@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:meal_planner/bottom_navigation.dart';
 
 import 'meal_page.dart';
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const MealPage(title: 'Meal Planner'),
+      home: BottomNavigationScreen(),
     );
   }
 }
