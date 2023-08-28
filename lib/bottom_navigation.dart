@@ -39,7 +39,9 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
             _currentIndex = index;
           });
         },
-        animationDuration: const Duration(seconds: 5),
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        indicatorColor: Colors.green[200],
+        elevation: 10,
         selectedIndex: _currentIndex,
       ),
     );
