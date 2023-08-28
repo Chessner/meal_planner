@@ -274,8 +274,12 @@ class RandomMealDialog extends StatelessWidget {
     return AlertDialog(
       title: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Center(
-          child: Text('Random meal: $meal'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Random meal:'),
+            Text(meal)
+          ],
         ),
       ),
     );
