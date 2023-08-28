@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meal_planner/calender_page.dart';
 import 'package:meal_planner/meal_page.dart';
 
 class BottomNavigationScreen extends StatefulWidget {
@@ -11,7 +12,7 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
   final int _previousIndex = 0;
   final List<Widget> _screens = [
     const MealPage(title: "Meal List"),
-    const MealPage(title: "Meal Planner"),
+    CalenderPage(),
   ];
 
   @override
