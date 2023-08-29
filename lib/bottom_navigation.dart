@@ -22,28 +22,33 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
         onWillPop: _onWillPop,
         child: _screens[_currentIndex],
       ),
-      bottomNavigationBar: NavigationBar(
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.set_meal),
-            icon: Icon(Icons.set_meal_outlined),
-            label: "Meals",
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.calendar_month),
-            icon: Icon(Icons.calendar_month_outlined),
-            label: "Calender",
-          ),
-        ],
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        indicatorColor: Colors.green[200],
-        elevation: 10,
-        selectedIndex: _currentIndex,
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(25.0)),
+        child: NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(
+              selectedIcon: Icon(Icons.set_meal),
+              icon: Icon(Icons.set_meal_outlined),
+              label: "Meals",
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.calendar_month),
+              icon: Icon(Icons.calendar_month_outlined),
+              label: "Calender",
+            ),
+          ],
+          onDestinationSelected: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+          indicatorColor: Colors.green[200],
+          elevation: 10,
+          selectedIndex: _currentIndex,
+         // indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+          indicatorShape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+        ),
       ),
     );
   }
