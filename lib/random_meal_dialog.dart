@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'calender_meal_form.dart';
+
 class RandomMealDialog extends StatelessWidget {
   const RandomMealDialog({
     super.key,
@@ -22,6 +24,13 @@ class RandomMealDialog extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             Navigator.of(context).pop();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => CalenderMealForm(
+                  meal: meal,
+                ),
+              ),
+            );
           },
           child: const Text("Add to calender >>"),
         )

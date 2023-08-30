@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_meal_form.dart';
-import 'calender_meal_form.dart';
 import 'edit_dialog.dart';
 import 'random_meal_dialog.dart';
 
@@ -92,16 +91,6 @@ class _MealPageState extends State<MealPage> {
       context: context,
       builder: (BuildContext builder) {
         return RandomMealDialog(meal: meal);
-      },
-    ).then(
-      (_) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => CalenderMealForm(
-              meal: meal,
-            ),
-          ),
-        );
       },
     );
   }
