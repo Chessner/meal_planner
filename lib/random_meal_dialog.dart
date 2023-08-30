@@ -15,12 +15,17 @@ class RandomMealDialog extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Random meal:'),
-            Text(meal)
-          ],
+          children: [const Text('Random meal:'), Text(meal)],
         ),
       ),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("Add to calender >>"),
+        )
+      ],
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_meal_form.dart';
+import 'calender_meal_form.dart';
 import 'edit_dialog.dart';
 import 'random_meal_dialog.dart';
 
@@ -88,10 +89,21 @@ class _MealPageState extends State<MealPage> {
     int index = _rand.nextInt(_meals.length);
     String meal = _meals[index];
     showDialog(
-        context: context,
-        builder: (BuildContext builder) {
-          return RandomMealDialog(meal: meal);
-        });
+      context: context,
+      builder: (BuildContext builder) {
+        return RandomMealDialog(meal: meal);
+      },
+    ).then(
+      (_) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CalenderMealForm(
+              meal: meal,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -135,7 +147,7 @@ class _MealPageState extends State<MealPage> {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+              (BuildContext context, int index) {
                 return Dismissible(
                   key: Key(_meals[index]),
                   direction: DismissDirection.startToEnd,
@@ -185,7 +197,7 @@ class _MealPageState extends State<MealPage> {
         );
       },
     ).then(
-          (newMeal) => {
+      (newMeal) => {
         if (newMeal != null)
           {
             if (newMeal != "")
