@@ -1,5 +1,6 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:meal_planner/bottom_navigation.dart';
 
 
@@ -16,6 +17,15 @@ class MyApp extends StatelessWidget {
     return CalendarControllerProvider(
       controller: EventController(),
       child: MaterialApp(
+        supportedLocales: [
+          const Locale('de'), // German
+          const Locale('en'),
+        ],
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         title: 'Flutter Demo',
         theme: ThemeData(
           // This is the theme of your application.
