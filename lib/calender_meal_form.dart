@@ -27,7 +27,7 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
           child: Form(
             key: _formKey,
             child: Scaffold(
-              body: ListView(
+              body: Column(
                 children: [
                   FormTextInputCard(
                     validator: (value) {
