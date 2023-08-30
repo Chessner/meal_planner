@@ -2,7 +2,6 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:meal_planner/bottom_navigation.dart';
 
-import 'meal_page.dart';
 
 void main() {
   runApp(const MyApp());
