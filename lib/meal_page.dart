@@ -2,9 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:meal_planner/meal_planner_database_helper.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
+import 'meal_planner_database_provider.dart';
 import 'add_meal_form.dart';
+import 'data/meal.dart';
 import 'edit_dialog.dart';
 import 'random_meal_dialog.dart';
 
@@ -18,47 +22,69 @@ class MealPage extends StatefulWidget {
 }
 
 class _MealPageState extends State<MealPage> {
-  List<String> _meals = [];
+  List<Meal> _meals = [];
   Random _rand = Random();
 
   void _addMeal(String meal) async {
-    setState(() {
-      if (_meals.contains(meal)) {
-        showDialog(
-            context: context,
-            builder: (BuildContext builder) {
-              return const AlertDialog(
-                title: Center(
-                  child: Text("Meal already exists"),
-                ),
-              );
-            });
-      } else {
-        _meals.add(meal);
-      }
-    });
-    _updatePrefs();
+    if (_meals.map((e) => e.name).contains(meal)) {
+      showDialog(
+          context: context,
+          builder: (BuildContext builder) {
+            return const AlertDialog(
+              title: Center(
+                child: Text("Meal already exists"),
+              ),
+            );
+          });
+    } else {
+      MealPlannerDatabaseHelper databaseHelper =
+          Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
+              .databaseHelper;
+      if (databaseHelper.database == null) return;
+      Database database = databaseHelper.database!;
+
+      await database.insert("meal", Meal(id: null, name: meal).toMap());
+      final List<Map<String, dynamic>> maps =
+          await database.query("meal", where: "name = ?", whereArgs: [meal]);
+      Meal m = Meal(id: maps[0]["id"], name: maps[0]["name"]);
+      setState(() {
+        print(m);
+        _meals.add(m);
+      });
+    }
   }
 
-  void _removeMeal(String meal) async {
+  void _removeMeal(Meal meal) async {
     setState(() {
       _meals.remove(meal);
     });
-    _updatePrefs();
+    MealPlannerDatabaseHelper databaseHelper =
+        Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
+            .databaseHelper;
+    if (databaseHelper.database == null) return;
+    Database database = databaseHelper.database!;
+    await database.delete("meal", where: "id = ?", whereArgs: [meal.id]);
   }
 
-  void _updateMeal(String oldMeal, String newMeal) async {
+  void _updateMeal(Meal oldMeal, String newMeal) async {
+    Meal updatedMeal = Meal(id: oldMeal.id, name: newMeal);
     int index = _meals.indexOf(oldMeal);
     setState(() {
-      _meals.removeAt(index);
-      _meals.insert(index, newMeal);
+      _meals[index] = updatedMeal;
     });
-    _updatePrefs();
+    _update(updatedMeal);
   }
 
-  void _updatePrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList("meals", _meals);
+  void _update(Meal changedMeal) async {
+    //final prefs = await SharedPreferences.getInstance();
+    //await prefs.setStringList("meals", _meals);
+    MealPlannerDatabaseHelper databaseHelper =
+        Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
+            .databaseHelper;
+    if (databaseHelper.database == null) return;
+    Database database = databaseHelper.database!;
+    await database.update("meal", changedMeal.toCompleteMap(),
+        where: "id = ?", whereArgs: [changedMeal.id]);
   }
 
   final _myController = TextEditingController();
@@ -70,23 +96,29 @@ class _MealPageState extends State<MealPage> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    _loadData();
-    super.initState();
-  }
-
-  Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    var list = prefs.getStringList("meals") ?? ["empty"];
-    setState(() {
-      _meals = list;
-    });
-  }
+  // Future<void> _loadData() async {
+  //   //  final prefs = await SharedPreferences.getInstance();
+  //   //  var list = prefs.getStringList("meals") ?? ["empty"];
+  //   //  setState(() {
+  //   //    _meals = list;
+  //   //  });
+  //   Database? database =
+  //       Provider.of<MealPlannerDatabaseProvider>(context).database;
+  //   if (database != null) {
+  //     final List<Map<String, dynamic>> maps = await database.query("meal");
+  //     var list = List.generate(maps.length, (index) {
+  //       return Meal(id: maps[index]["id"], name: maps[index]["name"]);
+  //     });
+  //     setState(() {
+  //       _meals = list;
+  //     });
+  //   }
+  // }
 
   void _randomMeal() {
+    print(_meals);
     int index = _rand.nextInt(_meals.length);
-    String meal = _meals[index];
+    String meal = _meals[index].name;
     showDialog(
       context: context,
       builder: (BuildContext builder) {
@@ -98,75 +130,98 @@ class _MealPageState extends State<MealPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            expandedHeight: 200.0,
-            actions: [
-              IconButton(
-                  onPressed: _randomMeal, icon: const Icon(Icons.lightbulb))
-            ],
-            backgroundColor: Theme.of(context).canvasColor,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text(widget.title,
-                  style: Theme.of(context).textTheme.titleLarge),
-              background: DecoratedBox(
-                position: DecorationPosition.foreground,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Theme.of(context).canvasColor, Colors.transparent],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.center,
-                  ),
-                  // gradient: RadialGradient(
-                  //   colors: [Colors.white, Colors.transparent],
-                  //   center: Alignment.bottomCenter,
-                  //   radius: 0.8
-                  // ),
-                ),
-                child: Image.asset(
-                  'assets/bee.jpg',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            //title: Text(widget.title),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Dismissible(
-                  key: Key(_meals[index]),
-                  direction: DismissDirection.startToEnd,
-                  onDismissed: (direction) {
-                    _removeMeal(_meals[index]);
-                  },
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
-                  ),
-                  child: ListTile(
-                    title: Text(_meals[index]),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        _onEdit(_meals[index]);
-                      },
-                    ),
-                  ),
-                );
-              },
-              childCount: _meals.length,
-            ),
-          ),
-        ],
+      body: Consumer<MealPlannerDatabaseProvider>(
+        builder: (context, databaseProvider, child) {
+          return FutureBuilder<List<Meal>>(
+              future: databaseProvider.databaseHelper.getAllMeals(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (snapshot.hasData) {
+                  List<Meal> meals = snapshot.data!;
+                  _meals = meals;
+                  return CustomScrollView(
+                    slivers: [
+                      SliverAppBar(
+                        pinned: true,
+                        expandedHeight: 200.0,
+                        actions: [
+                          IconButton(
+                              onPressed: _randomMeal,
+                              icon: const Icon(Icons.lightbulb))
+                        ],
+                        backgroundColor: Theme.of(context).canvasColor,
+                        flexibleSpace: FlexibleSpaceBar(
+                          centerTitle: true,
+                          title: Text(widget.title,
+                              style: Theme.of(context).textTheme.titleLarge),
+                          background: DecoratedBox(
+                            position: DecorationPosition.foreground,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Theme.of(context).canvasColor,
+                                  Colors.transparent
+                                ],
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.center,
+                              ),
+                              // gradient: RadialGradient(
+                              //   colors: [Colors.white, Colors.transparent],
+                              //   center: Alignment.bottomCenter,
+                              //   radius: 0.8
+                              // ),
+                            ),
+                            child: Image.asset(
+                              'assets/bee.jpg',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        //title: Text(widget.title),
+                      ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            return Dismissible(
+                              key: Key(_meals[index].toString()),
+                              direction: DismissDirection.startToEnd,
+                              onDismissed: (direction) {
+                                _removeMeal(_meals[index]);
+                              },
+                              background: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                child: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              child: ListTile(
+                                title: Text(_meals[index].name),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    _onEdit(_meals[index]);
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          childCount: _meals.length,
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return const Text('No data available');
+                }
+              });
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -177,20 +232,20 @@ class _MealPageState extends State<MealPage> {
     );
   }
 
-  void _onEdit(String oldMeal) {
+  void _onEdit(Meal oldMeal) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return EditDialog(
-          oldMeal: oldMeal,
+          oldMeal: oldMeal.name,
         );
       },
     ).then(
-      (newMeal) => {
-        if (newMeal != null)
+      (newMealName) => {
+        if (newMealName != null)
           {
-            if (newMeal != "")
-              {_updateMeal(oldMeal, newMeal)}
+            if (newMealName != "")
+              {_updateMeal(oldMeal, newMealName)}
             else
               {
                 Fluttertoast.showToast(

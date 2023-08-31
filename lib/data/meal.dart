@@ -1,12 +1,17 @@
 
 class Meal {
-  final int id;
+  final int? id;
   final String name;
   //Recipe? recipe;
 
   Meal({required this.id, required this.name});
 
   Map<String, dynamic> toMap() {
+    return {
+      "name": name,
+    };
+  }
+  Map<String, dynamic> toCompleteMap() {
     return {
       "id": id,
       "name": name,
