@@ -2,10 +2,14 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:meal_planner/bottom_navigation.dart';
-
+import 'package:meal_planner/meal_planner_database_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(ChangeNotifierProvider(
+      create: (context) => MealPlannerDatabaseProvider(),
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -14,6 +18,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final databaseProvider = Provider.of<MealPlannerDatabaseProvider>(context);
+    databaseProvider.init();
     return CalendarControllerProvider(
       controller: EventController(),
       child: MaterialApp(
