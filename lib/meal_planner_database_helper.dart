@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -5,13 +7,13 @@ import 'package:sqflite/sqflite.dart';
 import 'data/meal.dart';
 
 class MealPlannerDatabaseHelper {
-  Database? _database;
+  late final Future<Database> _database;
 
-  Database? get database => _database;
+  Future<Database> get database => _database;
 
-  Future<void> init() async {
+  Future<Database> init() async {
     // Open the database and store the reference.
-    _database = await openDatabase(
+    _database = openDatabase(
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
@@ -40,11 +42,11 @@ class MealPlannerDatabaseHelper {
       },
       version: 2,
     );
+    return _database;
   }
 
   Future<List<Meal>> getAllMeals() async {
-    if (database == null) return [];
-    final db = database!;
+    final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('meal');
     return List.generate(maps.length, (i) {
       return Meal(

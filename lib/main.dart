@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:meal_planner/bottom_navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'meal_planner_database_provider.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(ChangeNotifierProvider(
       create: (context) => MealPlannerDatabaseProvider(),
       child: const MyApp()));
@@ -20,7 +20,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final databaseProvider = Provider.of<MealPlannerDatabaseProvider>(context);
-    databaseProvider.databaseHelper.init();
     return CalendarControllerProvider(
       controller: EventController(),
       child: MaterialApp(
@@ -53,7 +52,24 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
           useMaterial3: true,
         ),
-        home: BottomNavigationScreen(),
+        home: FutureBuilder<Database>(
+          future: databaseProvider.databaseHelper.init(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // Return a loading indicator if the future is still running
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              // Handle error state
+              return Text('Error: ${snapshot.error}');
+            } else if (!snapshot.hasData) {
+              // Handle null data state
+              return const Text('No data available');
+            } else {
+              // Build your UI using the snapshot.data (Database object)
+              return BottomNavigationScreen();
+            }
+          },
+        ),
       ),
     );
   }

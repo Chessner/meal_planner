@@ -40,8 +40,7 @@ class _MealPageState extends State<MealPage> {
       MealPlannerDatabaseHelper databaseHelper =
           Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
               .databaseHelper;
-      if (databaseHelper.database == null) return;
-      Database database = databaseHelper.database!;
+      Database database = await databaseHelper.database;
 
       await database.insert("meal", Meal(id: null, name: meal).toMap());
       final List<Map<String, dynamic>> maps =
@@ -61,8 +60,7 @@ class _MealPageState extends State<MealPage> {
     MealPlannerDatabaseHelper databaseHelper =
         Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
             .databaseHelper;
-    if (databaseHelper.database == null) return;
-    Database database = databaseHelper.database!;
+    Database database = await databaseHelper.database;
     await database.delete("meal", where: "id = ?", whereArgs: [meal.id]);
   }
 
@@ -81,8 +79,7 @@ class _MealPageState extends State<MealPage> {
     MealPlannerDatabaseHelper databaseHelper =
         Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
             .databaseHelper;
-    if (databaseHelper.database == null) return;
-    Database database = databaseHelper.database!;
+    Database database = await databaseHelper.database;
     await database.update("meal", changedMeal.toCompleteMap(),
         where: "id = ?", whereArgs: [changedMeal.id]);
   }
