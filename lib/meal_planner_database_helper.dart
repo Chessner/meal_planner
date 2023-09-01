@@ -27,7 +27,7 @@ class MealPlannerDatabaseHelper {
             )""");
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion == 1) {
+        if (oldVersion < 4) {
           final prefs = await SharedPreferences.getInstance();
           var list = prefs.getStringList("meals") ?? [];
           List<Map<String, dynamic>> meals = list.map((e) {
@@ -38,9 +38,10 @@ class MealPlannerDatabaseHelper {
             await db.insert("meal", meal,
                 conflictAlgorithm: ConflictAlgorithm.replace);
           }
+          prefs.remove("meals");
         }
       },
-      version: 2,
+      version: 4,
     );
     return _database;
   }
