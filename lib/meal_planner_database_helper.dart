@@ -7,10 +7,13 @@ import 'data/meal.dart';
 
 class MealPlannerDatabaseHelper {
   late final Future<Database> _database;
+  bool _initCalled = false;
 
   Future<Database> get database => _database;
 
   Future<Database> init() async {
+    if (_initCalled) return _database;
+    _initCalled = true;
     // Open the database and store the reference.
     _database = openDatabase(
       // Set the path to the database. Note: Using the `join` function from the
@@ -43,11 +46,11 @@ class MealPlannerDatabaseHelper {
 
 Future<void> _updateDatabase(
     Database db, int fromVersion, int toVersion) async {
-    int curVersion = fromVersion;
-    if(fromVersion < 1 && curVersion < toVersion) {
-      await _v1(db);
-      curVersion++;
-    }
+  int curVersion = fromVersion;
+  if (fromVersion < 1 && curVersion < toVersion) {
+    await _v1(db);
+    curVersion++;
+  }
 }
 
 Future<void> _v1(Database db) async {
