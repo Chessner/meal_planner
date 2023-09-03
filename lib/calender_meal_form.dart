@@ -24,7 +24,9 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
       title: _mealNameController.text,
       description: _descriptionController.text,
       date: _selectedDate,
-      endDate: _selectedDate,
+      endDate: _selectedDate.add(
+        const Duration(seconds: 1),
+      ),
       startTime: _selectedDate,
       endTime: _selectedDate.add(
         const Duration(seconds: 1),
