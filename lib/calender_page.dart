@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
+import 'package:meal_planner/data/calendar_event.dart';
+import 'package:meal_planner/meal_planner_database_provider.dart';
+import 'package:provider/provider.dart';
 
 class CalenderPage extends StatefulWidget {
   @override
@@ -7,35 +10,50 @@ class CalenderPage extends StatefulWidget {
 }
 
 class _CalenderPageState extends State<CalenderPage> {
-  final event = CalendarEventData(
-    title: "title",
-    description: "dada",
-    date: DateTime.now(),
-    startTime: DateTime.now(),
-    endDate: DateTime.now().add(const Duration(hours: 2)),
-    endTime: DateTime.now().add(const Duration(hours: 2)),
-  );
-
   late final CalendarControllerProvider _provider;
+  bool loaded = false;
 
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _onLoad() async {
+    if (loaded) return;
     _provider = CalendarControllerProvider.of(context);
-    _provider.controller.add(event);
-    return Scaffold(
-      body: MonthView(
-        onCellTap: (events, date) {
-          // Implement callback when user taps on a cell.
-          print(events);
-        },
-        useAvailableVerticalSpace: true,
-      ),
-    );
+    MealPlannerDatabaseProvider dbProvider =
+        Provider.of<MealPlannerDatabaseProvider>(context);
+    final calendarEventDAO =
+        CalendarEventDao(await dbProvider.databaseHelper.database);
+    final events = await calendarEventDAO.getAllCalenderEvents();
+    for (var event in events) {
+      _provider.controller.add(CalendarEventData(
+        title: event.title,
+        description: event.description,
+        date: event.startDate,
+        endDate: event.endDate,
+        startTime: event.startDate,
+        endTime: event.endDate,
+      ));
+    }
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    _provider.controller.remove(event);
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _onLoad(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          return Scaffold(
+            body: MonthView(
+              onCellTap: (events, date) {
+                // Implement callback when user taps on a cell.
+                print(events);
+              },
+              useAvailableVerticalSpace: true,
+            ),
+          );
+        }
+      },
+    );
   }
 }

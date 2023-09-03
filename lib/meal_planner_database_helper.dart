@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'data/meal.dart';
@@ -20,28 +19,12 @@ class MealPlannerDatabaseHelper {
       join(await getDatabasesPath(), 'meal_planner.db'),
 
       onCreate: (db, version) async {
-        await db.execute("""
-            CREATE TABLE meal(
-              id INTEGER PRIMARY KEY, 
-              name TEXT
-            )""");
+        await _updateDatabase(db, 0, version);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 4) {
-          final prefs = await SharedPreferences.getInstance();
-          var list = prefs.getStringList("meals") ?? [];
-          List<Map<String, dynamic>> meals = list.map((e) {
-            return Meal(name: e, id: null).toMap();
-          }).toList();
-          print(meals);
-          for (var meal in meals) {
-            await db.insert("meal", meal,
-                conflictAlgorithm: ConflictAlgorithm.replace);
-          }
-          prefs.remove("meals");
-        }
+        await _updateDatabase(db, oldVersion, newVersion);
       },
-      version: 4,
+      version: 1,
     );
     return _database;
   }
@@ -58,13 +41,28 @@ class MealPlannerDatabaseHelper {
   }
 }
 
-/*
+Future<void> _updateDatabase(
+    Database db, int fromVersion, int toVersion) async {
+    int curVersion = fromVersion;
+    if(fromVersion < 1 && curVersion < toVersion) {
+      await _v1(db);
+      curVersion++;
+    }
+}
 
-            CREATE TABLE calendar_event(
-              id INTEGER PRIMARY KEY,
-              FOREIGN KEY (meal_id) REFERENCES meal(id),
-              description TEXT,
-              start_date TEXT,
-              end_date TEXT
-            )
- */
+Future<void> _v1(Database db) async {
+  await db.execute("""
+            CREATE TABLE meal(
+              id INTEGER PRIMARY KEY, 
+              name TEXT
+            )""");
+  await db.execute("""CREATE TABLE calendar_event(
+          id INTEGER PRIMARY KEY, 
+          title TEXT,
+          description TEXT, 
+          start_date TEXT, 
+          end_date Text, 
+          meal_id INTEGER, 
+          FOREIGN KEY (meal_id) REFERENCES meal(id) ON DELETE CASCADE
+          )""");
+}

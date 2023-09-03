@@ -1,5 +1,8 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
+import 'package:meal_planner/data/calendar_event.dart';
+import 'package:meal_planner/meal_planner_database_provider.dart';
+import 'package:provider/provider.dart';
 
 class CalenderMealForm extends StatefulWidget {
   const CalenderMealForm({super.key, required this.meal});
@@ -15,6 +18,25 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _mealNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  Future<int> _submit() async {
+    final ced = CalendarEventData(
+      title: _mealNameController.text,
+      description: _descriptionController.text,
+      date: _selectedDate,
+      endDate: _selectedDate,
+      startTime: _selectedDate,
+      endTime: _selectedDate.add(
+        const Duration(seconds: 1),
+      ),
+    );
+    final calendarEvent = CalendarEvent.fromCalendarEventData(ced);
+    final calendarEventDAO = CalendarEventDao(
+        await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
+            .databaseHelper
+            .database);
+    return await calendarEventDAO.insertCalendarEvent(calendarEvent);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,19 +123,16 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
               ),
               floatingActionButton: ElevatedButton(
                 onPressed: () {
-                  EventController controller =
-                      CalendarControllerProvider.of(context).controller;
-                  controller.add(
-                    CalendarEventData(
-                      title: _mealNameController.text,
-                      description: _descriptionController.text,
-                      date: _selectedDate,
-                      endDate: _selectedDate,
-                      startTime: _selectedDate,
-                      endTime: _selectedDate.add(
-                        const Duration(seconds: 1),
-                      ),
-                    ),
+                  FutureBuilder(
+                    future: _submit(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Container();
+                      } else {
+                        // Show a loading indicator or other UI while waiting for the future.
+                        return const CircularProgressIndicator();
+                      }
+                    },
                   );
                   Navigator.of(context).pop();
                 },
