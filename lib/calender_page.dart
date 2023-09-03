@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
+import 'package:meal_planner/calendar_event_dialog.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +46,12 @@ class _CalenderPageState extends State<CalenderPage> {
         } else {
           return Scaffold(
             body: MonthView(
+              onEventTap: (data, time) {
+                showDialog(context: context, builder: (BuildContext context) {
+                  return CalendarEventDialog(event: data);
+                });
+                print(data.title);
+              },
               onCellTap: (events, date) {
                 // Implement callback when user taps on a cell.
                 print(events);

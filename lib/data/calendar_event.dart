@@ -50,7 +50,8 @@ class CalendarEventDao {
   CalendarEventDao(this.database);
 
   Future<int> insertCalendarEvent(CalendarEvent event) async {
-    return await database.insert('calendar_event', event.toMap());
+    return await database.insert('calendar_event', event.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<CalendarEvent>> getAllCalenderEvents() async {
