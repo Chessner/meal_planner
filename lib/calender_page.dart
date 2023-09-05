@@ -11,6 +11,7 @@ class CalenderPage extends StatefulWidget {
 }
 
 class _CalenderPageState extends State<CalenderPage> {
+  int _viewIndex = 1;
   late final CalendarControllerProvider _provider;
   bool loaded = false;
 
@@ -32,6 +33,7 @@ class _CalenderPageState extends State<CalenderPage> {
         endTime: event.endDate,
       ));
     }
+    loaded = true;
   }
 
   @override
@@ -44,23 +46,75 @@ class _CalenderPageState extends State<CalenderPage> {
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
-          return Scaffold(
-            body: MonthView(
-              onEventTap: (data, time) {
-                showDialog(context: context, builder: (BuildContext context) {
-                  return CalendarEventDialog(event: data);
-                });
-                print(data.title);
-              },
-              onCellTap: (events, date) {
-                // Implement callback when user taps on a cell.
-                print(events);
-              },
-              useAvailableVerticalSpace: true,
+          return DefaultTabController(
+            initialIndex: _viewIndex,
+            length: 3,
+            child: Scaffold(
+              appBar: AppBar(
+                elevation: 10,
+                title: TabBar(
+                  onTap: (index) {
+                    setState(() {
+                      _viewIndex = index;
+                    });
+                  },
+                  tabs: <Widget>[
+                    Tab(
+                      icon: _viewIndex == 0
+                          ? const Icon(Icons.calendar_view_day_rounded)
+                          : const Icon(Icons.calendar_view_day_outlined),
+                    ),
+                    Tab(
+                      icon: _viewIndex == 1
+                          ? const Icon(Icons.calendar_view_week_rounded)
+                          : const Icon(Icons.calendar_view_week_outlined),
+                    ),
+                    Tab(
+                      icon: _viewIndex == 2
+                          ? const Icon(Icons.calendar_view_month_rounded)
+                          : const Icon(Icons.calendar_view_month_outlined),
+                    ),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [
+                  DayView(
+                    onEventTap: (data, time) {
+                      _onEventTap(data, time);
+                    },
+                  ),
+                  WeekView(
+                    onEventTap: (data, time) {
+                      _onEventTap(data, time);
+                    },
+                  ),
+                  MonthView(
+                    onEventTap: (data, time) {
+                      _onEventTap([data], time);
+                    },
+                    onCellTap: (events, date) {
+                      // Implement callback when user taps on a cell.
+                      print(events);
+                    },
+                    useAvailableVerticalSpace: true,
+                  ),
+                ],
+              ),
             ),
           );
         }
       },
     );
+  }
+
+  void _onEventTap(List<CalendarEventData<dynamic>> dataList, DateTime time) {
+    final data = dataList[0];
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CalendarEventDialog(event: data);
+        });
+    print(data.title);
   }
 }

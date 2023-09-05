@@ -25,11 +25,11 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
       description: _descriptionController.text,
       date: _selectedDate,
       endDate: _selectedDate.add(
-        const Duration(seconds: 1),
+        const Duration(hours: 1),
       ),
       startTime: _selectedDate,
       endTime: _selectedDate.add(
-        const Duration(seconds: 1),
+        const Duration(hours: 1),
       ),
     );
     final calendarEvent = CalendarEvent.fromCalendarEventData(ced);
