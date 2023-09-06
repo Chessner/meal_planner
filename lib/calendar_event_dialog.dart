@@ -12,8 +12,12 @@ class CalendarEventDialog extends StatelessWidget {
     return SimpleDialog(
       title: Row(
         children: [
-          Text(event.title),
           Expanded(
+            flex: 6,
+            child: Text(event.title),
+          ),
+          Expanded(
+            flex: 1,
             child: Align(
               alignment: Alignment.centerRight,
               child: IconButton(

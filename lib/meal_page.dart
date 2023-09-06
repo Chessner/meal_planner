@@ -115,7 +115,7 @@ class _MealPageState extends State<MealPage> {
   void _randomMeal() {
     print(_meals);
     int index = _rand.nextInt(_meals.length);
-    String meal = _meals[index].name;
+    Meal meal = _meals[index];
     showDialog(
       context: context,
       builder: (BuildContext builder) {

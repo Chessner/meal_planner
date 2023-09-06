@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'calender_meal_form.dart';
+import 'data/meal.dart';
 
 class RandomMealDialog extends StatelessWidget {
   const RandomMealDialog({
@@ -8,7 +9,7 @@ class RandomMealDialog extends StatelessWidget {
     required this.meal,
   });
 
-  final String meal;
+  final Meal meal;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class RandomMealDialog extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [const Text('Random meal:'), Text(meal)],
+          children: [const Text('Random meal:'), Text(meal.name)],
         ),
       ),
       actions: [
