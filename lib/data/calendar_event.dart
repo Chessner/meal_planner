@@ -1,5 +1,8 @@
 import 'package:calendar_view/calendar_view.dart';
+import 'package:meal_planner/data/tuple.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'meal.dart';
 
 class CalendarEvent {
   int? id;
@@ -17,10 +20,10 @@ class CalendarEvent {
       required this.startDate,
       required this.endDate});
 
-  static fromCalendarEventData(CalendarEventData data) {
+  static fromCalendarEventData(CalendarEventData<Tuple<int?, Meal>> data) {
     return CalendarEvent(
-        id: null,
-        mealId: null,
+        id: data.event!.item1,
+        mealId: data.event!.item2.id,
         title: data.title,
         description: data.description,
         startDate: data.date,

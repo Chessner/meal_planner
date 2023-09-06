@@ -3,13 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/data/meal.dart';
+import 'package:meal_planner/data/tuple.dart';
 import 'package:meal_planner/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
 
 class CalenderMealForm extends StatefulWidget {
-  const CalenderMealForm({super.key, required this.meal});
+  const CalenderMealForm(
+      {super.key,
+      required this.meal,
+      this.initialStartDate,
+      this.initialEndDate,
+      this.initialStartTime,
+      this.initialEndTime,
+      this.initialTitle,
+      this.initialDescription,
+      this.calendarEventId});
 
   final Meal meal;
+  final int? calendarEventId;
+  final DateTime? initialStartDate;
+  final DateTime? initialEndDate;
+  final TimeOfDay? initialStartTime;
+  final TimeOfDay? initialEndTime;
+  final String? initialTitle;
+  final String? initialDescription;
 
   @override
   State<CalenderMealForm> createState() => _CalenderMealFormState();
@@ -17,16 +34,29 @@ class CalenderMealForm extends StatefulWidget {
 
 class _CalenderMealFormState extends State<CalenderMealForm> {
   final _formKey = GlobalKey<FormState>();
-  DateTime _selectedStartDate = DateTime.now();
-  DateTime _selectedEndDate = DateTime.now().add(const Duration(hours: 1));
+
   final TextEditingController _mealNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  late final CalendarControllerProvider<Tuple<int?, Meal>>
+      _calendarControllerProvider;
+  bool _calendarControllerProviderSet = false;
+
+  DateTime _selectedStartDate = DateTime.now();
+  DateTime _selectedEndDate = DateTime.now().add(const Duration(hours: 1));
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime =
       TimeOfDay(hour: TimeOfDay.now().hour + 1, minute: TimeOfDay.now().minute);
+
+  bool _initialStartDateSet = false;
+  bool _initialEndDateSet = false;
+  bool _initialStartTimeSet = false;
+  bool _initialEndTimeSet = false;
+  bool _initialTitleSet = false;
+  bool _initialDescriptionSet = false;
+
   bool _startEndDateOnSameDay = true;
   bool _isSubmitting = false;
-  late BuildContext _scaffoldContext;
 
   Future<bool> _submit() async {
     setState(() {
@@ -57,14 +87,14 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
       return false;
     }
 
-    final ced = CalendarEventData(
+    final ced = CalendarEventData<Tuple<int?, Meal>>(
       title: _mealNameController.text,
       description: _descriptionController.text,
       date: startDateTime,
       endDate: endDateTime,
       startTime: startDateTime,
       endTime: endDateTime,
-      event: widget.meal,
+      event: Tuple(widget.calendarEventId, widget.meal),
     );
     final calendarEvent = CalendarEvent.fromCalendarEventData(ced);
     final calendarEventDAO = CalendarEventDao(
@@ -72,6 +102,13 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
             .databaseHelper
             .database);
     await calendarEventDAO.insertCalendarEvent(calendarEvent);
+
+    //Update calendar if event is not new
+    _calendarControllerProvider.controller.removeWhere((element) {
+      return element.event?.item1 == widget.calendarEventId;
+    });
+    _calendarControllerProvider.controller.add(ced);
+
     setState(() {
       _isSubmitting = false;
     });
@@ -80,9 +117,41 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
 
   @override
   Widget build(BuildContext context) {
-    _scaffoldContext = context;
-    _mealNameController.text = widget.meal.name;
-    _descriptionController.text = "";
+    if (!_calendarControllerProviderSet) {
+      setState(() {
+        _calendarControllerProvider =
+            CalendarControllerProvider.of<Tuple<int?, Meal>>(context);
+        _calendarControllerProviderSet = true;
+      });
+    }
+    setState(() {
+      if (widget.initialStartDate != null && !_initialStartDateSet) {
+        _selectedStartDate = widget.initialStartDate!;
+        _initialStartDateSet = true;
+      }
+      if (widget.initialEndDate != null && !_initialEndDateSet) {
+        _selectedEndDate = widget.initialEndDate!;
+        _initialEndDateSet = true;
+      }
+      if (widget.initialStartTime != null && !_initialStartTimeSet) {
+        _startTime = widget.initialStartTime!;
+        _initialStartTimeSet = true;
+      }
+      if (widget.initialEndTime != null && !_initialEndTimeSet) {
+        _endTime = widget.initialEndTime!;
+        _initialEndTimeSet = true;
+      }
+      if (widget.initialTitle != null && !_initialTitleSet) {
+        _mealNameController.text = widget.initialTitle!;
+      } else {
+        _mealNameController.text = widget.meal.name;
+      }
+      if (widget.initialDescription != null && !_initialDescriptionSet) {
+        _descriptionController.text = widget.initialDescription!;
+      } else {
+        _descriptionController.text = "";
+      }
+    });
     return Material(
       child: SafeArea(
         child: Padding(
@@ -363,7 +432,7 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
                                   fontSize: 16.0,
                                 );
                                 Future.delayed(Duration.zero, () {
-                                  Navigator.of(_scaffoldContext).pop();
+                                  Navigator.of(context).pop();
                                 });
                               } else {
                                 Fluttertoast.showToast(

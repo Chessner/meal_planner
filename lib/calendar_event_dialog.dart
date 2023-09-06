@@ -2,10 +2,14 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'calender_meal_form.dart';
+import 'data/meal.dart';
+import 'data/tuple.dart';
+
 class CalendarEventDialog extends StatelessWidget {
   const CalendarEventDialog({super.key, required this.event});
 
-  final CalendarEventData event;
+  final CalendarEventData<Tuple<int?, Meal>> event;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +25,25 @@ class CalendarEventDialog extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => CalenderMealForm(
+                        meal: event.event?.item2 ?? Meal(id: -1, name: event.title),
+                        calendarEventId: event.event?.item1,
+                        initialTitle: event.title,
+                        initialDescription: event.description,
+                        initialStartDate: event.date,
+                        initialEndDate: event.endDate,
+                        initialStartTime: TimeOfDay.fromDateTime(
+                            event.startTime ?? event.date),
+                        initialEndTime: TimeOfDay.fromDateTime(
+                            event.endTime ?? event.endDate),
+                      ),
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.edit),
               ),
             ),

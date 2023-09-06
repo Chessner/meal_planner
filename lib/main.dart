@@ -2,9 +2,11 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:meal_planner/bottom_navigation.dart';
+import 'package:meal_planner/data/tuple.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'data/meal.dart';
 import 'meal_planner_database_provider.dart';
 
 void main() {
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final databaseProvider = Provider.of<MealPlannerDatabaseProvider>(context);
-    return CalendarControllerProvider(
+    return CalendarControllerProvider<Tuple<int?, Meal>>(
       controller: EventController(),
       child: MaterialApp(
         supportedLocales: [

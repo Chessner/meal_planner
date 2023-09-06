@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:meal_planner/calendar_event_dialog.dart';
 import 'package:meal_planner/data/calendar_event.dart';
+import 'package:meal_planner/data/tuple.dart';
 import 'package:meal_planner/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
+
+import 'data/meal.dart';
 
 class CalenderPage extends StatefulWidget {
   @override
@@ -11,29 +15,50 @@ class CalenderPage extends StatefulWidget {
 }
 
 class _CalenderPageState extends State<CalenderPage> {
-  int _viewIndex = 1;
-  late final CalendarControllerProvider _provider;
+  int _viewIndex = 2;
+  late final CalendarControllerProvider<Tuple<int?, Meal>> _provider;
+  late CalendarControllerProvider<Tuple<int?, Meal>> _providerChangedDependencies;
   bool loaded = false;
 
   Future<void> _onLoad() async {
     if (loaded) return;
     _provider = CalendarControllerProvider.of(context);
-    MealPlannerDatabaseProvider dbProvider =
-        Provider.of<MealPlannerDatabaseProvider>(context);
-    final calendarEventDAO =
-        CalendarEventDao(await dbProvider.databaseHelper.database);
+    Database db = await Provider.of<MealPlannerDatabaseProvider>(context)
+        .databaseHelper
+        .database;
+    final calendarEventDAO = CalendarEventDao(db);
     final events = await calendarEventDAO.getAllCalenderEvents();
-    for (var event in events) {
-      _provider.controller.add(CalendarEventData(
+    for (final event in events) {
+      final List<Map<String, dynamic>> maps =
+          await db.query("meal", where: "id = ?", whereArgs: [event.mealId!]);
+      final meal = Meal(
+        id: maps[0]['id'],
+        name: maps[0]['name'],
+      );
+      _provider.controller.add(CalendarEventData<Tuple<int?, Meal>>(
         title: event.title,
         description: event.description,
         date: event.startDate,
         endDate: event.endDate,
         startTime: event.startDate,
         endTime: event.endDate,
+        event: Tuple(event.id, meal),
       ));
     }
     loaded = true;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Save a reference to the ancestor widget.
+    _providerChangedDependencies = CalendarControllerProvider.of(context);
+  }
+
+  @override
+  void dispose() {
+    _providerChangedDependencies.controller.removeWhere((element) => true);
+    super.dispose();
   }
 
   @override
@@ -79,17 +104,17 @@ class _CalenderPageState extends State<CalenderPage> {
               ),
               body: TabBarView(
                 children: [
-                  DayView(
+                  DayView<Tuple<int?, Meal>>(
                     onEventTap: (data, time) {
                       _onEventTap(data, time);
                     },
                   ),
-                  WeekView(
+                  WeekView<Tuple<int?, Meal>>(
                     onEventTap: (data, time) {
                       _onEventTap(data, time);
                     },
                   ),
-                  MonthView(
+                  MonthView<Tuple<int?, Meal>>(
                     onEventTap: (data, time) {
                       _onEventTap([data], time);
                     },
@@ -108,7 +133,8 @@ class _CalenderPageState extends State<CalenderPage> {
     );
   }
 
-  void _onEventTap(List<CalendarEventData<dynamic>> dataList, DateTime time) {
+  void _onEventTap(
+      List<CalendarEventData<Tuple<int?, Meal>>> dataList, DateTime time) {
     final data = dataList[0];
     showDialog(
         context: context,
