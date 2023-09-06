@@ -71,4 +71,8 @@ class CalendarEventDao {
       );
     });
   }
+
+  Future<void> removeCalendarEvent(int id) async {
+    database.delete("calendar_event", where: "id = ?", whereArgs: [id]);
+  }
 }

@@ -1,6 +1,9 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:meal_planner/data/calendar_event.dart';
+import 'package:meal_planner/meal_planner_database_provider.dart';
+import 'package:provider/provider.dart';
 
 import 'calender_meal_form.dart';
 import 'data/meal.dart';
@@ -17,8 +20,28 @@ class CalendarEventDialog extends StatelessWidget {
       title: Row(
         children: [
           Expanded(
-            flex: 6,
+            flex: 2,
             child: Text(event.title),
+          ),
+          Expanded(
+            flex: 2,
+            child: Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              icon: const Icon(Icons.delete),
+              color: Colors.red,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                CalendarControllerProvider.of<Tuple<int?, Meal>>(context).controller.remove(event);
+                var db =
+                    await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
+                        .databaseHelper
+                        .database;
+                CalendarEventDao(db)
+                    .removeCalendarEvent(event.event?.item1 ?? -1);
+              },
+            ),
+            ),
           ),
           Expanded(
             flex: 1,
@@ -30,7 +53,8 @@ class CalendarEventDialog extends StatelessWidget {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => CalenderMealForm(
-                        meal: event.event?.item2 ?? Meal(id: -1, name: event.title),
+                        meal: event.event?.item2 ??
+                            Meal(id: -1, name: event.title),
                         calendarEventId: event.event?.item1,
                         initialTitle: event.title,
                         initialDescription: event.description,
