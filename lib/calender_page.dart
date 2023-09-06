@@ -31,10 +31,10 @@ class _CalenderPageState extends State<CalenderPage> {
     for (final event in events) {
       final List<Map<String, dynamic>> maps =
           await db.query("meal", where: "id = ?", whereArgs: [event.mealId!]);
-      final meal = Meal(
+      final meal = maps.isNotEmpty ? Meal(
         id: maps[0]['id'],
         name: maps[0]['name'],
-      );
+      ) : Meal.emptyMeal();
       _provider.controller.add(CalendarEventData<Tuple<int?, Meal>>(
         title: event.title,
         description: event.description,

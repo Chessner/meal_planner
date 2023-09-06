@@ -104,10 +104,12 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
     await calendarEventDAO.insertCalendarEvent(calendarEvent);
 
     //Update calendar if event is not new
-    _calendarControllerProvider.controller.removeWhere((element) {
-      return element.event?.item1 == widget.calendarEventId;
-    });
-    _calendarControllerProvider.controller.add(ced);
+    if(_initialStartDateSet){
+      _calendarControllerProvider.controller.removeWhere((element) {
+        return element.event?.item1 == widget.calendarEventId;
+      });
+      _calendarControllerProvider.controller.add(ced);
+    }
 
     setState(() {
       _isSubmitting = false;

@@ -66,6 +66,6 @@ Future<void> _v1(Database db) async {
           start_date TEXT, 
           end_date Text, 
           meal_id INTEGER, 
-          FOREIGN KEY (meal_id) REFERENCES meal(id) ON DELETE CASCADE
+          CONSTRAINT fk_meal FOREIGN KEY (meal_id) REFERENCES meal(id)
           )""");
 }

@@ -70,10 +70,10 @@ class _MealPageState extends State<MealPage> {
     setState(() {
       _meals[index] = updatedMeal;
     });
-    _update(updatedMeal);
+    _updateDB(updatedMeal);
   }
 
-  void _update(Meal changedMeal) async {
+  void _updateDB(Meal changedMeal) async {
     //final prefs = await SharedPreferences.getInstance();
     //await prefs.setStringList("meals", _meals);
     MealPlannerDatabaseHelper databaseHelper =
@@ -113,7 +113,15 @@ class _MealPageState extends State<MealPage> {
   // }
 
   void _randomMeal() {
-    print(_meals);
+    if (_meals.isEmpty) {
+      Fluttertoast.showToast(
+        msg: "The list is empty. Please add some meals and try again!",
+        fontSize: 16,
+        gravity: ToastGravity.BOTTOM,
+        toastLength: Toast.LENGTH_LONG,
+      );
+      return;
+    }
     int index = _rand.nextInt(_meals.length);
     Meal meal = _meals[index];
     showDialog(
@@ -278,6 +286,10 @@ class _MealPageState extends State<MealPage> {
       builder: (BuildContext context) {
         return AddMealForm();
       },
-    ).then((value) => _addMeal(value));
+    ).then((value) {
+      if (value != null) {
+        _addMeal(value);
+      }
+    });
   }
 }
