@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meal_planner/calender_page.dart';
-import 'package:meal_planner/meal_page.dart';
+import 'package:meal_planner/pages/calender_page.dart';
+import 'package:meal_planner/pages/ingredients_page.dart';
+import 'package:meal_planner/pages/meal_page.dart';
 
 class BottomNavigationScreen extends StatefulWidget {
   @override
@@ -8,9 +9,9 @@ class BottomNavigationScreen extends StatefulWidget {
 }
 
 class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
-  int _currentIndex = 0;
-  final int _previousIndex = 0;
+  int _currentIndex = 1;
   final List<Widget> _screens = [
+    IngredientsPage(),
     const MealPage(title: "Meal List"),
     CalenderPage(),
   ];
@@ -18,14 +19,16 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WillPopScope(
-        onWillPop: _onWillPop,
-        child: _screens[_currentIndex],
-      ),
+      body: _screens[_currentIndex],
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(25.0)),
         child: NavigationBar(
           destinations: const <Widget>[
+            NavigationDestination(
+              selectedIcon: Icon(Icons.list),
+              icon: Icon(Icons.list_outlined),
+              label: "Ingredients",
+            ),
             NavigationDestination(
               selectedIcon: Icon(Icons.set_meal),
               icon: Icon(Icons.set_meal_outlined),
@@ -46,20 +49,11 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
           indicatorColor: Colors.green[200],
           elevation: 10,
           selectedIndex: _currentIndex,
-         // indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-          indicatorShape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+          // indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+          indicatorShape: const BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(15))),
         ),
       ),
     );
-  }
-
-  Future<bool> _onWillPop() async {
-    if (_previousIndex == _currentIndex) {
-      return true;
-    }
-    setState(() {
-      _currentIndex = 0;
-    });
-    return false;
   }
 }

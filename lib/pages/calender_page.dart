@@ -7,7 +7,7 @@ import 'package:meal_planner/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'data/meal.dart';
+import '../data/meal.dart';
 
 class CalenderPage extends StatefulWidget {
   @override

@@ -6,11 +6,11 @@ import 'package:meal_planner/meal_planner_database_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'meal_planner_database_provider.dart';
-import 'add_meal_form.dart';
-import 'data/meal.dart';
-import 'edit_dialog.dart';
-import 'random_meal_dialog.dart';
+import '../meal_planner_database_provider.dart';
+import '../add_meal_form.dart';
+import '../data/meal.dart';
+import '../edit_dialog.dart';
+import '../random_meal_dialog.dart';
 
 class MealPage extends StatefulWidget {
   const MealPage({super.key, required this.title});
