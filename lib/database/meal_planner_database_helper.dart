@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../data/ingredient.dart';
 import '../data/meal.dart';
 
 class MealPlannerDatabaseHelper {
@@ -27,7 +28,7 @@ class MealPlannerDatabaseHelper {
       onUpgrade: (db, oldVersion, newVersion) async {
         await _updateDatabase(db, oldVersion, newVersion);
       },
-      version: 1,
+      version: 2,
     );
     return _database;
   }
@@ -40,6 +41,18 @@ class MealPlannerDatabaseHelper {
         id: maps[i]['id'],
         name: maps[i]['name'],
       );
+    });
+  }
+
+  Future<List<Ingredient>> getAllIngredients() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query("ingredient");
+    return List.generate(maps.length, (i) {
+      return Ingredient(
+          id: maps[i]["id"],
+          name: maps[i]["name"],
+          unit: maps[i]["unit"],
+          amount: maps[i]["amount"]);
     });
   }
 }
