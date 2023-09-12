@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meal_planner/meal_planner_database_helper.dart';
+import 'package:meal_planner/database/meal_planner_database_helper.dart';
 
 
 class MealPlannerDatabaseProvider extends ChangeNotifier {

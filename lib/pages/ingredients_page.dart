@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:meal_planner/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../database/meal_planner_database_provider.dart';
 
 class IngredientsPage extends StatefulWidget {
   @override

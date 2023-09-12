@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'data/meal.dart';
+import '../data/meal.dart';
 
 class MealPlannerDatabaseHelper {
   late final Future<Database> _database;
@@ -51,6 +51,10 @@ Future<void> _updateDatabase(
     await _v1(db);
     curVersion++;
   }
+  if (fromVersion < 2 && curVersion < toVersion) {
+    await _v2(db);
+    curVersion++;
+  }
 }
 
 Future<void> _v1(Database db) async {
@@ -68,4 +72,14 @@ Future<void> _v1(Database db) async {
           meal_id INTEGER, 
           CONSTRAINT fk_meal FOREIGN KEY (meal_id) REFERENCES meal(id)
           )""");
+}
+
+Future<void> _v2(Database db) async {
+  await db.execute("""
+       CREATE TABLE ingredient(
+         id INTEGER PRIMARY KEY,
+         name TEXT,
+         unit INTEGER,
+         amount REAL
+       )""");
 }

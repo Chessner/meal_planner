@@ -3,11 +3,11 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:meal_planner/calendar_event_dialog.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/data/tuple.dart';
-import 'package:meal_planner/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../data/meal.dart';
+import '../database/meal_planner_database_provider.dart';
 
 class CalenderPage extends StatefulWidget {
   @override

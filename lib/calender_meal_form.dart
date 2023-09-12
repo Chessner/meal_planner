@@ -4,8 +4,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/data/meal.dart';
 import 'package:meal_planner/data/tuple.dart';
-import 'package:meal_planner/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
+
+import 'database/meal_planner_database_provider.dart';
 
 class CalenderMealForm extends StatefulWidget {
   const CalenderMealForm(

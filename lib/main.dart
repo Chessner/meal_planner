@@ -5,9 +5,8 @@ import 'package:meal_planner/bottom_navigation.dart';
 import 'package:meal_planner/data/tuple.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
-
 import 'data/meal.dart';
-import 'meal_planner_database_provider.dart';
+import 'database/meal_planner_database_provider.dart';
 
 void main() {
   runApp(ChangeNotifierProvider(

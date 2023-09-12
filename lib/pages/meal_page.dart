@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:meal_planner/meal_planner_database_helper.dart';
+import 'package:meal_planner/database/meal_planner_database_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../meal_planner_database_provider.dart';
+import '../database/meal_planner_database_provider.dart';
 import '../add_meal_form.dart';
 import '../data/meal.dart';
 import '../edit_dialog.dart';
