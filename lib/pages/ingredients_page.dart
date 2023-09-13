@@ -83,8 +83,10 @@ class _IngredientsPageState extends State<IngredientsPage> {
                             onResize: () {
                               print("onResize");
                             },
-                            onDismissed: (direction) {
-                              print("onDismissed $direction");
+                            onDismissed: (direction) async {
+                              IngredientDao(
+                                      await mDbProvider.databaseHelper.database)
+                                  .deleteIngredient(_ingredients[index]);
                             },
                             background: Container(
                               color: Colors.red,
