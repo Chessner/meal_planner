@@ -17,6 +17,7 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
   bool _isSubmitting = false;
   Unit? _chosenUnit;
   String _chosenName = "";
+  bool _shoppable = true;
 
   void _submit() async {
     setState(() {
@@ -30,9 +31,17 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
           await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
               .databaseHelper
               .database;
-      int id = await database.insert("ingredient",
-          Ingredient(id: null, name: _chosenName, unit: _chosenUnit!).toMap());
-      var ingredientWithId = Ingredient.fromMap(await IngredientDao(database).getIngredient(id));
+      int id = await database.insert(
+        "ingredient",
+        Ingredient(
+                id: null,
+                name: _chosenName,
+                unit: _chosenUnit!,
+                includeInShopping: _shoppable)
+            .toMap(),
+      );
+      var ingredientWithId =
+          Ingredient.fromMap(await IngredientDao(database).getIngredient(id));
       Future.delayed(Duration.zero, () {
         Navigator.of(context).pop(ingredientWithId);
       });
@@ -137,6 +146,32 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
                       ),
                     ),
                   ],
+                ),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Include in shopping list?",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Checkbox(
+                              value: _shoppable,
+                              onChanged: (newBool) {
+                                setState(() {
+                                  _shoppable = newBool ?? false;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 if (!_isSubmitting)
                   Row(

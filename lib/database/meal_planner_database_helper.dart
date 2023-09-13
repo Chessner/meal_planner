@@ -28,7 +28,7 @@ class MealPlannerDatabaseHelper {
       onUpgrade: (db, oldVersion, newVersion) async {
         await _updateDatabase(db, oldVersion, newVersion);
       },
-      version: 2,
+      version: 3,
     );
     return _database;
   }
@@ -48,10 +48,7 @@ class MealPlannerDatabaseHelper {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query("ingredient");
     return List.generate(maps.length, (i) {
-      return Ingredient(
-          id: maps[i]["id"],
-          name: maps[i]["name"],
-          unit: Ingredient.intToUnit(maps[i]["unit"]));
+      return Ingredient.fromMap(maps[i]);
     });
   }
 }
@@ -65,6 +62,10 @@ Future<void> _updateDatabase(
   }
   if (fromVersion < 2 && curVersion < toVersion) {
     await _v2(db);
+    curVersion++;
+  }
+  if (fromVersion < 3 && curVersion < toVersion) {
+    await _v3(db);
     curVersion++;
   }
 }
@@ -93,4 +94,10 @@ Future<void> _v2(Database db) async {
          name TEXT,
          unit INTEGER
        )""");
+}
+
+Future<void> _v3(Database db) async {
+  await db.execute("""
+       ALTER TABLE ingredient ADD COLUMN include_in_shopping INTEGER DEFAULT 1;
+       """);
 }

@@ -13,19 +13,18 @@ class IngredientsPage extends StatefulWidget {
 class _IngredientsPageState extends State<IngredientsPage> {
   List<Ingredient> _ingredients = [];
 
-  _showAddIngredientDialog(BuildContext context) {
-    showDialog<Ingredient?>(
+  _showAddIngredientDialog(BuildContext context) async {
+    final resultingIngredient = await showDialog<Ingredient?>(
       context: context,
       builder: (BuildContext context) {
         return AddIngredientDialog();
       },
-    ).then((ingredient) {
-      if (ingredient != null) {
-        setState(() {
-          _ingredients.add(ingredient);
-        });
-      }
-    });
+    );
+    if (resultingIngredient != null) {
+      setState(() {
+        _ingredients.add(resultingIngredient);
+      });
+    }
   }
 
   @override

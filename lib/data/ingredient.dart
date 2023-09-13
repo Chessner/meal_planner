@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
+// Caution: Units are saved in database according to their index.
+// Only append new units to avoid interfering with saved data.
 enum Unit { pieces, grams, milliliter }
 
 class Ingredient {
@@ -7,17 +9,20 @@ class Ingredient {
     required this.id,
     required this.name,
     required this.unit,
+    required this.includeInShopping,
   });
 
   final int? id;
   final String name;
   final Unit unit;
+  final bool includeInShopping;
 
   Map<String, dynamic> toMap() {
     return {
       "id": id,
       "name": name,
       "unit": unit.index,
+      "include_in_shopping": includeInShopping ? 1 : 0,
     };
   }
 
@@ -25,7 +30,12 @@ class Ingredient {
     return Ingredient(
         id: map["id"],
         name: map["name"],
-        unit: Ingredient.intToUnit(map["unit"]));
+        unit: Ingredient.intToUnit(map["unit"]),
+        includeInShopping: intToBool(map["include_in_shopping"]));
+  }
+
+  static bool intToBool(int value) {
+    return value == 1;
   }
 
   static Unit intToUnit(int index) {
