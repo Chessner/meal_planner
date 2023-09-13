@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meal_planner/add_ingredient_view.dart';
+import 'package:meal_planner/add_ingredient_dialog.dart';
 import 'package:meal_planner/data/ingredient.dart';
 import 'package:provider/provider.dart';
 
@@ -11,15 +11,21 @@ class IngredientsPage extends StatefulWidget {
 }
 
 class _IngredientsPageState extends State<IngredientsPage> {
-  List<String> _ingredients = [];
+  List<Ingredient> _ingredients = [];
 
   _showAddIngredientDialog(BuildContext context) {
-    showModalBottomSheet(
+    showDialog<Ingredient?>(
       context: context,
       builder: (BuildContext context) {
-        return AddIngredientView();
+        return AddIngredientDialog();
       },
-    );
+    ).then((ingredient) {
+      if (ingredient != null) {
+        setState(() {
+          _ingredients.add(ingredient);
+        });
+      }
+    });
   }
 
   @override
@@ -36,6 +42,7 @@ class _IngredientsPageState extends State<IngredientsPage> {
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
+                _ingredients = snapshot.data!;
                 return CustomScrollView(
                   slivers: [
                     SliverAppBar(
@@ -69,7 +76,7 @@ class _IngredientsPageState extends State<IngredientsPage> {
                       delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
                           return Dismissible(
-                            key: Key(_ingredients[index]),
+                            key: Key(_ingredients[index].id.toString()),
                             direction: DismissDirection.startToEnd,
                             onUpdate: (details) {
                               print("onUpdate ${details.progress}");
@@ -91,7 +98,9 @@ class _IngredientsPageState extends State<IngredientsPage> {
                               ),
                             ),
                             child: ListTile(
-                              title: Text(_ingredients[index]),
+                              title: Text(_ingredients[index].name),
+                              subtitle: Text(
+                                  _ingredients[index].unit.name.toUpperCase()),
                               trailing: IconButton(
                                 icon: const Icon(Icons.edit),
                                 onPressed: () {},

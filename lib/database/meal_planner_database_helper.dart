@@ -51,8 +51,7 @@ class MealPlannerDatabaseHelper {
       return Ingredient(
           id: maps[i]["id"],
           name: maps[i]["name"],
-          unit: maps[i]["unit"],
-          amount: maps[i]["amount"]);
+          unit: Ingredient.intToUnit(maps[i]["unit"]));
     });
   }
 }
@@ -92,7 +91,6 @@ Future<void> _v2(Database db) async {
        CREATE TABLE ingredient(
          id INTEGER PRIMARY KEY,
          name TEXT,
-         unit INTEGER,
-         amount REAL
+         unit INTEGER
        )""");
 }

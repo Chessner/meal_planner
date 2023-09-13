@@ -466,11 +466,13 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
 class FormTextInputCard extends StatelessWidget {
   const FormTextInputCard({
     super.key,
-    required this.validator,
+    this.onSaved,
+    this.validator,
     required this.title,
     required this.controller,
   });
 
+  final void Function(String?)? onSaved;
   final String? Function(String?)? validator;
   final String title;
   final TextEditingController controller;
@@ -487,6 +489,7 @@ class FormTextInputCard extends StatelessWidget {
               child: Text(title),
             ),
             TextFormField(
+              onSaved: onSaved,
               controller: controller,
               validator: validator,
             ),
