@@ -28,7 +28,10 @@ class MealPlannerDatabaseHelper {
       onUpgrade: (db, oldVersion, newVersion) async {
         await _updateDatabase(db, oldVersion, newVersion);
       },
-      version: 3,
+      onConfigure: (db) async {
+        await db.execute("PRAGMA foreign_keys = ON");
+      },
+      version: 4,
     );
     return _database;
   }
@@ -68,6 +71,10 @@ Future<void> _updateDatabase(
     await _v3(db);
     curVersion++;
   }
+  if (fromVersion < 4 && curVersion < toVersion) {
+    await _v4(db);
+    curVersion++;
+  }
 }
 
 Future<void> _v1(Database db) async {
@@ -100,4 +107,15 @@ Future<void> _v3(Database db) async {
   await db.execute("""
        ALTER TABLE ingredient ADD COLUMN include_in_shopping INTEGER DEFAULT 1;
        """);
+}
+
+Future<void> _v4(Database db) async {
+  await db.execute("""CREATE TABLE ingredients_of_meal(
+    id INTEGER PRIMARY KEY,
+    ingredient_id INTEGER,
+    meal_id INTEGER,
+    amount REAL,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredient(id) ON DELETE CASCADE,
+    FOREIGN KEY (meal_id) REFERENCES meal(id) ON DELETE CASCADE
+  )""");
 }
