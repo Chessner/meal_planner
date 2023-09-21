@@ -25,32 +25,10 @@ class _MealPageState extends State<MealPage> {
   List<Meal> _meals = [];
   Random _rand = Random();
 
-  void _addMeal(String meal) async {
-    if (_meals.map((e) => e.name).contains(meal)) {
-      showDialog(
-          context: context,
-          builder: (BuildContext builder) {
-            return const AlertDialog(
-              title: Center(
-                child: Text("Meal already exists"),
-              ),
-            );
-          });
-    } else {
-      MealPlannerDatabaseHelper databaseHelper =
-          Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
-              .databaseHelper;
-      Database database = await databaseHelper.database;
-
-      await database.insert("meal", Meal(id: null, name: meal).toMap());
-      final List<Map<String, dynamic>> maps =
-          await database.query("meal", where: "name = ?", whereArgs: [meal]);
-      Meal m = Meal(id: maps[0]["id"], name: maps[0]["name"]);
-      setState(() {
-        print(m);
-        _meals.add(m);
-      });
-    }
+  void _addMeal(Meal meal) {
+    setState(() {
+      _meals.add(meal);
+    });
   }
 
   void _removeMeal(Meal meal) async {
@@ -281,7 +259,8 @@ class _MealPageState extends State<MealPage> {
   }
 
   void _showAddMealFormDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet<Meal?>(
+      elevation: 5,
       context: context,
       builder: (BuildContext context) {
         return AddMealForm();

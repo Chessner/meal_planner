@@ -41,4 +41,11 @@ class MealDao {
     await database.execute(
         "UPDATE calendar_event SET meal_id = $newId WHERE meal_id = $mealId");
   }
+
+  Future<Meal> insertAndReturnMeal(Meal meal) async {
+    int insertedId = await database.insert("meal", meal.toMap());
+    final List<Map<String, dynamic>> maps =
+    await database.query("meal", where: "id = ?", whereArgs: [insertedId]);
+    return Meal(id: maps[0]["id"], name: maps[0]["name"]);
+  }
 }

@@ -43,6 +43,17 @@ class Ingredient {
         "Index out of bounds of amount of Unit types.");
     return Unit.values[index];
   }
+
+  static String suffixOf(Unit unit){
+    switch(unit){
+      case Unit.pieces:
+        return "pc";
+      case Unit.grams:
+        return "g";
+      case Unit.milliliter:
+        return "ml";
+    }
+  }
 }
 
 class IngredientDao {
