@@ -26,6 +26,11 @@ class Ingredient {
     };
   }
 
+  @override
+  String toString() {
+    return "Ingredient{id: $id, name: $name, unit: ${unit.name}, includeInShopping: $includeInShopping}";
+  }
+
   static Ingredient fromMap(Map<String, dynamic> map) {
     return Ingredient(
         id: map["id"],
@@ -44,8 +49,8 @@ class Ingredient {
     return Unit.values[index];
   }
 
-  static String suffixOf(Unit unit){
-    switch(unit){
+  static String suffixOf(Unit unit) {
+    switch (unit) {
       case Unit.pieces:
         return "pc";
       case Unit.grams:

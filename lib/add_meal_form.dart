@@ -151,7 +151,12 @@ class _AddMealFormState extends State<AddMealForm> {
                                 List<Ingredient> ingredients =
                                     await db.databaseHelper.getAllIngredients();
                                 return ingredients.where((ingredient) {
-                                  return ingredient.name.contains(filterString);
+                                  return ingredient.name
+                                          .contains(filterString) &&
+                                      !_selectedIngredientsAndAmount.any(
+                                          (element) =>
+                                              element.item1.id ==
+                                              ingredient.id);
                                 }).toList();
                               },
                               compareFn: (ingredient1, ingredient2) {
@@ -168,6 +173,11 @@ class _AddMealFormState extends State<AddMealForm> {
                     IngredientAmountList(
                       selectedIngredientsAndAmount:
                           _selectedIngredientsAndAmount,
+                      deleteEntry: (index) {
+                        setState(() {
+                          _selectedIngredientsAndAmount.removeAt(index);
+                        });
+                      },
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).viewInsets.bottom > 60
@@ -219,9 +229,11 @@ class IngredientAmountList extends StatelessWidget {
   const IngredientAmountList({
     super.key,
     required List<Tuple<Ingredient, num>> selectedIngredientsAndAmount,
+    required this.deleteEntry,
   }) : _selectedIngredientsAndAmount = selectedIngredientsAndAmount;
 
   final List<Tuple<Ingredient, num>> _selectedIngredientsAndAmount;
+  final Function(int) deleteEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -241,40 +253,57 @@ class IngredientAmountList extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemBuilder: (BuildContext context, int index) {
-                  return Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              _selectedIngredientsAndAmount[index].item1.name,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
+                  return Dismissible(
+                    onDismissed: (_) {
+                      deleteEntry(index);
+                    },
+                    direction: DismissDirection.startToEnd,
+                    background: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Container(
+                        color: Colors.red,
+                        child: const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(Icons.delete),
                           ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                0,
-                                0,
-                                8,
-                                0,
-                              ),
-                              child: AmountInputField(
-                                suffix: Ingredient.suffixOf(
-                                    _selectedIngredientsAndAmount[index]
-                                        .item1
-                                        .unit),
-                                onSaved: (String? amount) {
-                                  _selectedIngredientsAndAmount[index].item2 =
-                                      double.parse(amount!);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ],
+                    ),
+                    key: Key(
+                        _selectedIngredientsAndAmount[index].item1.toString()),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            _selectedIngredientsAndAmount[index].item1.name,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              0,
+                              0,
+                              8,
+                              0,
+                            ),
+                            child: AmountInputField(
+                              suffix: Ingredient.suffixOf(
+                                  _selectedIngredientsAndAmount[index]
+                                      .item1
+                                      .unit),
+                              onSaved: (String? amount) {
+                                _selectedIngredientsAndAmount[index].item2 =
+                                    double.parse(amount!);
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
                 itemCount: _selectedIngredientsAndAmount.length,
