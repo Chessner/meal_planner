@@ -1,15 +1,16 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:meal_planner/calender_meal_form.dart';
 import 'package:meal_planner/data/meal_ingredient.dart';
 import 'package:meal_planner/database/meal_planner_database_provider.dart';
 import 'package:meal_planner/toast.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'data/ingredient.dart';
-import 'data/meal.dart';
-import 'data/tuple.dart';
+import '../data/ingredient.dart';
+import '../data/meal.dart';
+import '../data/tuple.dart';
+import 'calender_meal_form.dart';
+
 
 class AddMealForm extends StatefulWidget {
   @override

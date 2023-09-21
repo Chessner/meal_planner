@@ -4,10 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:provider/provider.dart';
 
-import 'calender_meal_form.dart';
 import 'data/meal.dart';
 import 'data/tuple.dart';
 import 'database/meal_planner_database_provider.dart';
+import 'forms/calender_meal_form.dart';
 
 class CalendarEventDialog extends StatelessWidget {
   const CalendarEventDialog({super.key, required this.event});

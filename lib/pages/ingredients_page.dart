@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meal_planner/add_ingredient_dialog.dart';
+import 'package:meal_planner/forms/add_ingredient_form.dart';
 import 'package:meal_planner/data/ingredient.dart';
 import 'package:provider/provider.dart';
 

@@ -7,9 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
-import '../add_meal_form.dart';
 import '../data/meal.dart';
 import '../edit_dialog.dart';
+import '../forms/add_meal_form.dart';
 import '../random_meal_dialog.dart';
 
 class MealPage extends StatefulWidget {
@@ -70,25 +70,6 @@ class _MealPageState extends State<MealPage> {
     _myController.dispose();
     super.dispose();
   }
-
-  // Future<void> _loadData() async {
-  //   //  final prefs = await SharedPreferences.getInstance();
-  //   //  var list = prefs.getStringList("meals") ?? ["empty"];
-  //   //  setState(() {
-  //   //    _meals = list;
-  //   //  });
-  //   Database? database =
-  //       Provider.of<MealPlannerDatabaseProvider>(context).database;
-  //   if (database != null) {
-  //     final List<Map<String, dynamic>> maps = await database.query("meal");
-  //     var list = List.generate(maps.length, (index) {
-  //       return Meal(id: maps[index]["id"], name: maps[index]["name"]);
-  //     });
-  //     setState(() {
-  //       _meals = list;
-  //     });
-  //   }
-  // }
 
   void _randomMeal() {
     if (_meals.isEmpty) {
