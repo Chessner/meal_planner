@@ -1,9 +1,9 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/data/meal.dart';
 import 'package:meal_planner/data/tuple.dart';
+import 'package:meal_planner/toast.dart';
 import 'package:provider/provider.dart';
 
 import 'database/meal_planner_database_provider.dart';
@@ -105,7 +105,7 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
     await calendarEventDAO.insertCalendarEvent(calendarEvent);
 
     //Update calendar if event is not new
-    if(_initialStartDateSet){
+    if (_initialStartDateSet) {
       _calendarControllerProvider.controller.removeWhere((element) {
         return element.event?.item1 == widget.calendarEventId;
       });
@@ -425,29 +425,13 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
                             onPressed: () async {
                               bool submissionResult = await _submit();
                               if (submissionResult) {
-                                Fluttertoast.showToast(
-                                  msg: "Saved",
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.grey,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0,
-                                );
+                                MealPlannerToast.showShortToast("Saved");
                                 Future.delayed(Duration.zero, () {
                                   Navigator.of(context).pop();
                                 });
                               } else {
-                                Fluttertoast.showToast(
-                                  msg:
-                                      "End date and time must be after start date and time",
-                                  toastLength: Toast.LENGTH_LONG,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.grey,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0,
-                                );
+                                MealPlannerToast.showLongToast(
+                                    "End date and time must be after start date and time");
                               }
                             },
                             child: const Text("Save"),
@@ -489,6 +473,7 @@ class FormTextInputCard extends StatelessWidget {
               child: Text(title),
             ),
             TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               onSaved: onSaved,
               controller: controller,
               validator: validator,
