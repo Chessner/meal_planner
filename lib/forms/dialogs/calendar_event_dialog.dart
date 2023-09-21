@@ -54,7 +54,7 @@ class CalendarEventDialog extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => CalenderMealForm(
                         meal: event.event?.item2 ??
-                            Meal(id: -1, name: event.title),
+                            Meal.create(name: event.title),
                         calendarEventId: event.event?.item1,
                         initialTitle: event.title,
                         initialDescription: event.description,

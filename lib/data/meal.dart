@@ -4,12 +4,14 @@ class Meal {
   final int? id;
   final String name;
 
-  //Recipe? recipe;
+  Meal._({required this.id, required this.name});
 
-  Meal({required this.id, required this.name});
+  factory Meal.create({required name}) {
+    return Meal._(id: null, name: name);
+  }
 
-  static Meal emptyMeal() {
-    return Meal(id: -1, name: "");
+  factory Meal.emptyMeal() {
+    return Meal._(id: null, name: "");
   }
 
   Map<String, dynamic> toMap() {
@@ -25,9 +27,17 @@ class Meal {
     };
   }
 
+  Meal copyWith({required String newName}){
+    return Meal._(id: id, name: newName);
+  }
+
   @override
   String toString() {
     return "Meal{id: $id, name: $name}";
+  }
+
+  static Meal fromMap(Map<String, dynamic> map){
+    return Meal._(id: map["id"], name: map["name"]);
   }
 }
 
@@ -45,14 +55,14 @@ class MealDao {
   Future<Meal> insertAndReturnMeal(Meal meal) async {
     int insertedId = await _database.insert("meal", meal.toMap());
     final List<Map<String, dynamic>> maps =
-    await _database.query("meal", where: "id = ?", whereArgs: [insertedId]);
-    return Meal(id: maps[0]["id"], name: maps[0]["name"]);
+        await _database.query("meal", where: "id = ?", whereArgs: [insertedId]);
+    return Meal._(id: maps[0]["id"], name: maps[0]["name"]);
   }
 
   Future<List<Meal>> getAllMeals() async {
     final List<Map<String, dynamic>> maps = await _database.query('meal');
     return List.generate(maps.length, (i) {
-      return Meal(
+      return Meal._(
         id: maps[i]['id'],
         name: maps[i]['name'],
       );

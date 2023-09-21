@@ -44,7 +44,7 @@ class _MealPageState extends State<MealPage> {
   }
 
   void _updateMeal(Meal oldMeal, String newMeal) async {
-    Meal updatedMeal = Meal(id: oldMeal.id, name: newMeal);
+    Meal updatedMeal = oldMeal.copyWith(newName: newMeal);
     int index = _meals.indexOf(oldMeal);
     setState(() {
       _meals[index] = updatedMeal;
@@ -53,8 +53,6 @@ class _MealPageState extends State<MealPage> {
   }
 
   void _updateDB(Meal changedMeal) async {
-    //final prefs = await SharedPreferences.getInstance();
-    //await prefs.setStringList("meals", _meals);
     MealPlannerDatabaseHelper databaseHelper =
         Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
             .databaseHelper;
@@ -137,11 +135,6 @@ class _MealPageState extends State<MealPage> {
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.center,
                               ),
-                              // gradient: RadialGradient(
-                              //   colors: [Colors.white, Colors.transparent],
-                              //   center: Alignment.bottomCenter,
-                              //   radius: 0.8
-                              // ),
                             ),
                             child: Image.asset(
                               'assets/bee.jpg',
@@ -149,7 +142,6 @@ class _MealPageState extends State<MealPage> {
                             ),
                           ),
                         ),
-                        //title: Text(widget.title),
                       ),
                       SliverList(
                         delegate: SliverChildBuilderDelegate(

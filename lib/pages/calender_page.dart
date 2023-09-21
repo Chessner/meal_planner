@@ -17,7 +17,8 @@ class CalenderPage extends StatefulWidget {
 class _CalenderPageState extends State<CalenderPage> {
   int _viewIndex = 2;
   late final CalendarControllerProvider<Tuple<int?, Meal>> _provider;
-  late CalendarControllerProvider<Tuple<int?, Meal>> _providerChangedDependencies;
+  late CalendarControllerProvider<Tuple<int?, Meal>>
+      _providerChangedDependencies;
   bool loaded = false;
 
   Future<void> _onLoad() async {
@@ -31,10 +32,7 @@ class _CalenderPageState extends State<CalenderPage> {
     for (final event in events) {
       final List<Map<String, dynamic>> maps =
           await db.query("meal", where: "id = ?", whereArgs: [event.mealId!]);
-      final meal = maps.isNotEmpty ? Meal(
-        id: maps[0]['id'],
-        name: maps[0]['name'],
-      ) : Meal.emptyMeal();
+      final meal = maps.isNotEmpty ? Meal.fromMap(maps[0]) : Meal.emptyMeal();
       _provider.controller.add(CalendarEventData<Tuple<int?, Meal>>(
         title: event.title,
         description: event.description,

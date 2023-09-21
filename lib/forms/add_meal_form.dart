@@ -43,7 +43,7 @@ class _AddMealFormState extends State<AddMealForm> {
               .databaseHelper
               .database;
       Meal dbMeal = await MealDao(database)
-          .insertAndReturnMeal(Meal(id: null, name: _mealName));
+          .insertAndReturnMeal(Meal.create(name: _mealName));
 
       final List<MealIngredient> mealIngredients =
           _selectedIngredientsAndAmount.map((ingredientAndAmount) {
