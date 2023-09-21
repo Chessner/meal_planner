@@ -6,7 +6,7 @@ class Meal {
 
   Meal._({required this.id, required this.name});
 
-  factory Meal.create({required name}) {
+  factory Meal.create({required String name}) {
     return Meal._(id: null, name: name);
   }
 
