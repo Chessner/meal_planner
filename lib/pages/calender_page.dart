@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
-import 'package:meal_planner/calendar_event_dialog.dart';
+import 'package:meal_planner/forms/calendar_event_dialog.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/data/tuple.dart';
 import 'package:provider/provider.dart';

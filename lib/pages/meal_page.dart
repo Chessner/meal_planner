@@ -8,9 +8,9 @@ import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
 import '../data/meal.dart';
-import '../edit_dialog.dart';
+import '../forms/edit_dialog.dart';
 import '../forms/add_meal_form.dart';
-import '../random_meal_dialog.dart';
+import '../forms/random_meal_dialog.dart';
 
 class MealPage extends StatefulWidget {
   const MealPage({super.key, required this.title});
