@@ -11,7 +11,6 @@ import '../data/meal.dart';
 import '../data/tuple.dart';
 import 'calender_meal_form.dart';
 
-
 class AddMealForm extends StatefulWidget {
   @override
   State<AddMealForm> createState() => _AddMealFormState();
@@ -63,6 +62,10 @@ class _AddMealFormState extends State<AddMealForm> {
       _isSubmitting = false;
     });
     return null;
+  }
+
+  Future<List<Ingredient>> _loadData(Future<Database> database) async {
+    return IngredientDao(await database).getAllIngredients();
   }
 
   @override
@@ -150,7 +153,7 @@ class _AddMealFormState extends State<AddMealForm> {
                               },
                               asyncItems: (filterString) async {
                                 List<Ingredient> ingredients =
-                                    await db.databaseHelper.getAllIngredients();
+                                    await _loadData(db.databaseHelper.database);
                                 return ingredients.where((ingredient) {
                                   return ingredient.name
                                           .contains(filterString) &&

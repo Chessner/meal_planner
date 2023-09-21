@@ -94,4 +94,11 @@ class IngredientDao {
     return (await _database
         .query("ingredient", where: "id = ?", whereArgs: [id]))[0];
   }
+
+  Future<List<Ingredient>> getAllIngredients() async {
+    final List<Map<String, dynamic>> maps = await _database.query("ingredient");
+    return List.generate(maps.length, (i) {
+      return Ingredient.fromMap(maps[i]);
+    });
+  }
 }

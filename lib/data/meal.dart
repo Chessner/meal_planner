@@ -32,20 +32,30 @@ class Meal {
 }
 
 class MealDao {
-  final Database database;
+  final Database _database;
 
-  MealDao(this.database);
+  MealDao(this._database);
 
   Future<void> updateCalendarEventReferencesFromTo(
       int mealId, int newId) async {
-    await database.execute(
+    await _database.execute(
         "UPDATE calendar_event SET meal_id = $newId WHERE meal_id = $mealId");
   }
 
   Future<Meal> insertAndReturnMeal(Meal meal) async {
-    int insertedId = await database.insert("meal", meal.toMap());
+    int insertedId = await _database.insert("meal", meal.toMap());
     final List<Map<String, dynamic>> maps =
-    await database.query("meal", where: "id = ?", whereArgs: [insertedId]);
+    await _database.query("meal", where: "id = ?", whereArgs: [insertedId]);
     return Meal(id: maps[0]["id"], name: maps[0]["name"]);
+  }
+
+  Future<List<Meal>> getAllMeals() async {
+    final List<Map<String, dynamic>> maps = await _database.query('meal');
+    return List.generate(maps.length, (i) {
+      return Meal(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+      );
+    });
   }
 }

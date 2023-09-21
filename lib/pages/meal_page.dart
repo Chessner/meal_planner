@@ -92,13 +92,17 @@ class _MealPageState extends State<MealPage> {
     );
   }
 
+  Future<List<Meal>> _loadData(Future<Database> database) async {
+    return MealDao(await database).getAllMeals();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Consumer<MealPlannerDatabaseProvider>(
         builder: (context, databaseProvider, child) {
           return FutureBuilder<List<Meal>>(
-              future: databaseProvider.databaseHelper.getAllMeals(),
+              future: _loadData(databaseProvider.databaseHelper.database),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();

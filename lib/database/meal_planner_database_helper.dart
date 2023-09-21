@@ -3,9 +3,6 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../data/ingredient.dart';
-import '../data/meal.dart';
-
 class MealPlannerDatabaseHelper {
   late final Future<Database> _database;
   bool _initCalled = false;
@@ -34,25 +31,6 @@ class MealPlannerDatabaseHelper {
       version: 4,
     );
     return _database;
-  }
-
-  Future<List<Meal>> getAllMeals() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('meal');
-    return List.generate(maps.length, (i) {
-      return Meal(
-        id: maps[i]['id'],
-        name: maps[i]['name'],
-      );
-    });
-  }
-
-  Future<List<Ingredient>> getAllIngredients() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query("ingredient");
-    return List.generate(maps.length, (i) {
-      return Ingredient.fromMap(maps[i]);
-    });
   }
 }
 

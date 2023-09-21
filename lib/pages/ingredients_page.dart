@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meal_planner/forms/add_ingredient_form.dart';
 import 'package:meal_planner/data/ingredient.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
 
@@ -27,6 +28,10 @@ class _IngredientsPageState extends State<IngredientsPage> {
     }
   }
 
+  Future<List<Ingredient>> _loadData(Future<Database> database) async {
+    return IngredientDao(await database).getAllIngredients();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +39,7 @@ class _IngredientsPageState extends State<IngredientsPage> {
         builder: (BuildContext context, MealPlannerDatabaseProvider mDbProvider,
             Widget? child) {
           return FutureBuilder<List<Ingredient>>(
-            future: mDbProvider.databaseHelper.getAllIngredients(),
+            future: _loadData(mDbProvider.databaseHelper.database),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
