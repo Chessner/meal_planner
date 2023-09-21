@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
-import 'package:meal_planner/forms/calendar_event_dialog.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/data/tuple.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../data/meal.dart';
 import '../database/meal_planner_database_provider.dart';
+import '../forms/dialogs/calendar_event_dialog.dart';
 
 class CalenderPage extends StatefulWidget {
   @override

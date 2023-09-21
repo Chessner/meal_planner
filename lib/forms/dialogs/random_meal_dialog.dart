@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../data/meal.dart';
-import 'calender_meal_form.dart';
+import '../../data/meal.dart';
+import '../calender_meal_form.dart';
 
 class RandomMealDialog extends StatelessWidget {
   const RandomMealDialog({

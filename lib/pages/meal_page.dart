@@ -3,14 +3,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:meal_planner/database/meal_planner_database_helper.dart';
+import 'package:meal_planner/toast.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
 import '../data/meal.dart';
-import '../forms/edit_dialog.dart';
 import '../forms/add_meal_form.dart';
-import '../forms/random_meal_dialog.dart';
+import '../forms/dialogs/edit_dialog.dart';
+import '../forms/dialogs/random_meal_dialog.dart';
 
 class MealPage extends StatefulWidget {
   const MealPage({super.key, required this.title});
@@ -212,28 +213,13 @@ class _MealPageState extends State<MealPage> {
               {_updateMeal(oldMeal, newMealName)}
             else
               {
-                Fluttertoast.showToast(
-                  msg: "Did not save, because meal name was empty.",
-                  toastLength: Toast.LENGTH_LONG,
-                  gravity: ToastGravity.BOTTOM,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.grey,
-                  textColor: Colors.white,
-                  fontSize: 16.0,
-                ),
+                MealPlannerToast.showLongToast(
+                    "Did not save, because meal name was empty"),
               },
           }
         else
           {
-            Fluttertoast.showToast(
-              msg: "Canceled.",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.grey,
-              textColor: Colors.white,
-              fontSize: 16.0,
-            ),
+            MealPlannerToast.showShortToast("Canceled"),
           },
       },
     );
