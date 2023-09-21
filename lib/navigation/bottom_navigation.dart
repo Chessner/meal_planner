@@ -3,6 +3,24 @@ import 'package:meal_planner/pages/calender_page.dart';
 import 'package:meal_planner/pages/ingredients_page.dart';
 import 'package:meal_planner/pages/meal_page.dart';
 
+const List<Widget> _navigationDestinations = [
+  NavigationDestination(
+    selectedIcon: Icon(Icons.list),
+    icon: Icon(Icons.list_outlined),
+    label: "Ingredients",
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.set_meal),
+    icon: Icon(Icons.set_meal_outlined),
+    label: "Meals",
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.calendar_month),
+    icon: Icon(Icons.calendar_month_outlined),
+    label: "Calender",
+  ),
+];
+
 class BottomNavigationScreen extends StatefulWidget {
   @override
   State<BottomNavigationScreen> createState() => _BottomNavigationScreenState();
@@ -23,23 +41,7 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(25.0)),
         child: NavigationBar(
-          destinations: const <Widget>[
-            NavigationDestination(
-              selectedIcon: Icon(Icons.list),
-              icon: Icon(Icons.list_outlined),
-              label: "Ingredients",
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.set_meal),
-              icon: Icon(Icons.set_meal_outlined),
-              label: "Meals",
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.calendar_month),
-              icon: Icon(Icons.calendar_month_outlined),
-              label: "Calender",
-            ),
-          ],
+          destinations: _navigationDestinations,
           onDestinationSelected: (index) {
             setState(() {
               _currentIndex = index;
@@ -49,9 +51,8 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
           indicatorColor: Colors.green[200],
           elevation: 10,
           selectedIndex: _currentIndex,
-          // indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-          indicatorShape: const BeveledRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(15))),
+          indicatorShape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20))),
         ),
       ),
     );
