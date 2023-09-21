@@ -165,71 +165,9 @@ class _AddMealFormState extends State<AddMealForm> {
                         );
                       },
                     ),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: _selectedIngredientsAndAmount.isEmpty
-                            ? Row(
-                                children: [
-                                  Text(
-                                    "No meals added!",
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                ],
-                              )
-                            : ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 2,
-                                            child: Text(
-                                              _selectedIngredientsAndAmount[
-                                                      index]
-                                                  .item1
-                                                  .name,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyLarge,
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                0,
-                                                0,
-                                                8,
-                                                0,
-                                              ),
-                                              child: AmountInputField(
-                                                suffix: Ingredient.suffixOf(
-                                                    _selectedIngredientsAndAmount[
-                                                            index]
-                                                        .item1
-                                                        .unit),
-                                                onSaved: (String? amount) {
-                                                  _selectedIngredientsAndAmount[
-                                                              index]
-                                                          .item2 =
-                                                      double.parse(amount!);
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                },
-                                itemCount: _selectedIngredientsAndAmount.length,
-                              ),
-                      ),
+                    IngredientAmountList(
+                      selectedIngredientsAndAmount:
+                          _selectedIngredientsAndAmount,
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).viewInsets.bottom > 60
@@ -256,7 +194,7 @@ class _AddMealFormState extends State<AddMealForm> {
                               Meal? meal = await _onSubmit();
                               if (meal == null) {
                                 MealPlannerToast.showLongToast(
-                                    "Something went wrong");
+                                    "Please check the form and make sure everything is filled out correctly");
                               } else {
                                 Future.delayed(Duration.zero, () {
                                   Navigator.of(context)
@@ -272,6 +210,75 @@ class _AddMealFormState extends State<AddMealForm> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class IngredientAmountList extends StatelessWidget {
+  const IngredientAmountList({
+    super.key,
+    required List<Tuple<Ingredient, num>> selectedIngredientsAndAmount,
+  }) : _selectedIngredientsAndAmount = selectedIngredientsAndAmount;
+
+  final List<Tuple<Ingredient, num>> _selectedIngredientsAndAmount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: _selectedIngredientsAndAmount.isEmpty
+            ? Row(
+                children: [
+                  Text(
+                    "No meals added!",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              )
+            : ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              _selectedIngredientsAndAmount[index].item1.name,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                0,
+                                0,
+                                8,
+                                0,
+                              ),
+                              child: AmountInputField(
+                                suffix: Ingredient.suffixOf(
+                                    _selectedIngredientsAndAmount[index]
+                                        .item1
+                                        .unit),
+                                onSaved: (String? amount) {
+                                  _selectedIngredientsAndAmount[index].item2 =
+                                      double.parse(amount!);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+                itemCount: _selectedIngredientsAndAmount.length,
+              ),
       ),
     );
   }
