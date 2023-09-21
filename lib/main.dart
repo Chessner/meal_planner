@@ -1,7 +1,7 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:meal_planner/bottom_navigation.dart';
+import 'package:meal_planner/navigation/bottom_navigation.dart';
 import 'package:meal_planner/data/tuple.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
