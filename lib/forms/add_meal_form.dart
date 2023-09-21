@@ -238,7 +238,6 @@ class IngredientAmountList extends StatelessWidget {
 
   final List<Tuple<Ingredient, num>> _selectedIngredientsAndAmount;
   final Function(int) deleteEntry;
-
   @override
   Widget build(BuildContext context) {
     return Card(

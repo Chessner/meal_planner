@@ -5,12 +5,18 @@ import 'package:sqflite/sqflite.dart';
 enum Unit { pieces, grams, milliliter }
 
 class Ingredient {
-  const Ingredient({
+  const Ingredient._({
     required this.id,
     required this.name,
     required this.unit,
     required this.includeInShopping,
   });
+
+  factory Ingredient.create(
+      {required name, required unit, required includeInShopping}) {
+    return Ingredient._(
+        id: null, name: name, unit: unit, includeInShopping: includeInShopping);
+  }
 
   final int? id;
   final String name;
@@ -32,7 +38,7 @@ class Ingredient {
   }
 
   static Ingredient fromMap(Map<String, dynamic> map) {
-    return Ingredient(
+    return Ingredient._(
         id: map["id"],
         name: map["name"],
         unit: Ingredient.intToUnit(map["unit"]),

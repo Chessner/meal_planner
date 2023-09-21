@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_planner/data/ingredient.dart';
 import 'package:meal_planner/data/meal.dart';
@@ -34,7 +33,7 @@ void main() {
         MealDao mealDataAccessObject = MealDao(database);
         Meal mealPreDb = Meal(id: null, name: "Zwetschkenkuchen");
         Meal mealPostDb =
-            await mealDataAccessObject.insertAndReturnMeal(mealPreDb);
+        await mealDataAccessObject.insertAndReturnMeal(mealPreDb);
         expect(mealPreDb.name, mealPostDb.name);
         expect(mealPreDb.id, null);
         expect(mealPostDb.id, 1);
@@ -43,8 +42,39 @@ void main() {
 
     group("Ingredients test", () {
       test("empty table at install", () async {
-        final ingredientMaps = await IngredientDao(database).getAllIngredients();
+        final ingredientMaps =
+        await IngredientDao(database).getAllIngredients();
         expect(ingredientMaps, []);
+      });
+
+      test("insert automatically creates id", () async {
+        final Ingredient ing1 = Ingredient.create(
+            name: "Milch", unit: Unit.milliliter, includeInShopping: true);
+        final Ingredient ing2 = Ingredient.create(
+            name: "Mehl", unit: Unit.milliliter, includeInShopping: true);
+        final ingredientDao = IngredientDao(database);
+        await ingredientDao.insertIngredient(ing1);
+        await ingredientDao.insertIngredient(ing2);
+
+        final ingredients = await ingredientDao.getAllIngredients();
+        expect(
+            ingredients
+                .where((ingredient) => ingredient.name == "Milch")
+                .first
+                .id,
+            1);
+        expect(
+            ingredients
+                .where((ingredient) => ingredient.name == "Mehl")
+                .first
+                .id,
+            2);
+
+        expect(
+            ingredients
+                .where((ingredient) => ingredient.name == "Milch")
+                .length
+            ,1);
       });
     });
   });

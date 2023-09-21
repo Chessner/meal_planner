@@ -34,8 +34,7 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
               .database;
       int id = await database.insert(
         "ingredient",
-        Ingredient(
-                id: null,
+        Ingredient.create(
                 name: _chosenName,
                 unit: _chosenUnit!,
                 includeInShopping: _shoppable)
