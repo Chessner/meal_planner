@@ -23,7 +23,7 @@ class _IngredientDialogState extends State<IngredientDialog> {
   bool _isSubmitting = false;
   Unit? _chosenUnit;
   String _chosenName = "";
-  bool _shoppable = true;
+  bool? _shoppable;
 
   void _submit() async {
     setState(() {
@@ -46,7 +46,7 @@ class _IngredientDialogState extends State<IngredientDialog> {
         submittedIngredient = widget.ingredient!.copyWith(
             name: _chosenName,
             unit: _chosenUnit,
-            includeInShopping: _shoppable);
+            includeInShopping: _shoppable ?? true);
 
         await ingredientDao.updateIngredient(submittedIngredient);
       } else {
@@ -54,7 +54,7 @@ class _IngredientDialogState extends State<IngredientDialog> {
         int id = await ingredientDao.insertIngredient(Ingredient.create(
             name: _chosenName,
             unit: _chosenUnit,
-            includeInShopping: _shoppable));
+            includeInShopping: _shoppable ?? true));
         submittedIngredient = await ingredientDao.getIngredient(id);
       }
       Future.delayed(Duration.zero, () {
@@ -138,10 +138,10 @@ class _IngredientDialogState extends State<IngredientDialog> {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: Checkbox(
-                              value: _shoppable,
+                              value: widget.ingredient?.includeInShopping ?? true,
                               onChanged: (newBool) {
                                 setState(() {
-                                  _shoppable = newBool ?? false;
+                                  _shoppable = newBool ?? true;
                                 });
                               },
                             ),
