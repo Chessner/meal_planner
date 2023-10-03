@@ -147,13 +147,17 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
       }
       if (widget.initialTitle != null && !_initialTitleSet) {
         _mealNameController.text = widget.initialTitle!;
-      } else {
+        _initialTitleSet = true;
+      } else if(!_initialTitleSet) {
         _mealNameController.text = widget.meal.name;
+        _initialTitleSet = true;
       }
       if (widget.initialDescription != null && !_initialDescriptionSet) {
         _descriptionController.text = widget.initialDescription!;
-      } else {
+        _initialDescriptionSet = true;
+      } else if(!_initialDescriptionSet) {
         _descriptionController.text = "";
+        _initialDescriptionSet = true;
       }
     });
     return Material(
