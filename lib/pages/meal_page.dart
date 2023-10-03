@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 import '../database/meal_planner_database_provider.dart';
 import '../data/meal.dart';
 import '../forms/add_meal_form.dart';
-import '../forms/dialogs/edit_dialog.dart';
+import '../forms/dialogs/edit_meal_dialog.dart';
 import '../forms/dialogs/random_meal_dialog.dart';
 
 class MealPage extends StatefulWidget {
@@ -194,19 +194,30 @@ class _MealPageState extends State<MealPage> {
   }
 
   void _onEdit(Meal oldMeal) {
-    showDialog(
+    showDialog<String?>(
       context: context,
       builder: (BuildContext context) {
-        return EditDialog(
+        return EditMealDialog(
           oldMeal: oldMeal.name,
         );
       },
     ).then(
       (newMealName) => {
+        print(newMealName),
+        print(oldMeal.name),
         if (newMealName != null)
           {
-            if (newMealName != "")
-              {_updateMeal(oldMeal, newMealName)}
+            if (newMealName.isNotEmpty)
+              {
+                if (newMealName == oldMeal.name)
+                  {
+                    MealPlannerToast.showShortToast("Meal remained unchanged"),
+                  }
+                else
+                  {
+                    _updateMeal(oldMeal, newMealName),
+                  }
+              }
             else
               {
                 MealPlannerToast.showLongToast(
