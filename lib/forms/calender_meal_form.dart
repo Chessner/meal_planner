@@ -7,6 +7,7 @@ import 'package:meal_planner/toast.dart';
 import 'package:provider/provider.dart';
 
 import '../database/meal_planner_database_provider.dart';
+import 'form_text_input_card.dart';
 
 
 class CalenderMealForm extends StatefulWidget {
@@ -446,44 +447,6 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
                     ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class FormTextInputCard extends StatelessWidget {
-  const FormTextInputCard({
-    super.key,
-    this.onSaved,
-    this.validator,
-    required this.title,
-    required this.controller,
-  });
-
-  final void Function(String?)? onSaved;
-  final String? Function(String?)? validator;
-  final String title;
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(title),
-            ),
-            TextFormField(
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              onSaved: onSaved,
-              controller: controller,
-              validator: validator,
-            ),
-          ],
         ),
       ),
     );

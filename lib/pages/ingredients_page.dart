@@ -14,11 +14,17 @@ class IngredientsPage extends StatefulWidget {
 class _IngredientsPageState extends State<IngredientsPage> {
   List<Ingredient> _ingredients = [];
 
-  _showAddIngredientDialog(BuildContext context) async {
+  _showIngredientDialog(
+      {required BuildContext context,
+      Ingredient? ingredient,
+      required String title}) async {
     final resultingIngredient = await showDialog<Ingredient?>(
       context: context,
       builder: (BuildContext context) {
-        return AddIngredientDialog();
+        return IngredientDialog(
+          ingredient: ingredient,
+          title: title,
+        );
       },
     );
     if (resultingIngredient != null) {
@@ -109,7 +115,12 @@ class _IngredientsPageState extends State<IngredientsPage> {
                                   _ingredients[index].unit.name.toUpperCase()),
                               trailing: IconButton(
                                 icon: const Icon(Icons.edit),
-                                onPressed: () {},
+                                onPressed: () {
+                                  _showIngredientDialog(
+                                      context: context,
+                                      ingredient: _ingredients[index],
+                                      title: "Edit an ingredient");
+                                },
                               ),
                             ),
                           );
@@ -126,7 +137,8 @@ class _IngredientsPageState extends State<IngredientsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _showAddIngredientDialog(context);
+          _showIngredientDialog(
+              context: context, title: "Create a new ingredient");
         },
         child: const Icon(Icons.add),
       ),

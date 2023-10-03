@@ -65,6 +65,14 @@ class Ingredient {
         return "ml";
     }
   }
+
+  Ingredient copyWith({String? name, Unit? unit, bool? includeInShopping}) {
+    return Ingredient._(
+        id: id,
+        name: name ?? this.name,
+        unit: unit ?? this.unit,
+        includeInShopping: includeInShopping ?? this.includeInShopping);
+  }
 }
 
 class IngredientDao {
@@ -72,8 +80,8 @@ class IngredientDao {
 
   IngredientDao(this._database);
 
-  Future<void> insertIngredient(Ingredient ingredient) async {
-    await _database.insert(
+  Future<int> insertIngredient(Ingredient ingredient) async {
+    return await _database.insert(
       "ingredient",
       ingredient.toMap(),
     );
@@ -96,9 +104,9 @@ class IngredientDao {
     );
   }
 
-  Future<Map<String, dynamic>> getIngredient(int id) async {
-    return (await _database
-        .query("ingredient", where: "id = ?", whereArgs: [id]))[0];
+  Future<Ingredient> getIngredient(int id) async {
+    return Ingredient.fromMap((await _database
+        .query("ingredient", where: "id = ?", whereArgs: [id]))[0]);
   }
 
   Future<List<Ingredient>> getAllIngredients() async {
