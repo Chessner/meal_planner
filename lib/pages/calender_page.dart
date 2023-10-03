@@ -64,69 +64,86 @@ class _CalenderPageState extends State<CalenderPage> {
     return FutureBuilder<void>(
       future: _onLoad(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          return DefaultTabController(
-            initialIndex: _viewIndex,
-            length: 3,
-            child: Scaffold(
-              appBar: AppBar(
-                elevation: 10,
-                title: TabBar(
-                  onTap: (index) {
-                    setState(() {
-                      _viewIndex = index;
-                    });
-                  },
-                  tabs: <Widget>[
-                    Tab(
-                      icon: _viewIndex == 0
-                          ? const Icon(Icons.calendar_view_day_rounded)
-                          : const Icon(Icons.calendar_view_day_outlined),
-                    ),
-                    Tab(
-                      icon: _viewIndex == 1
-                          ? const Icon(Icons.calendar_view_week_rounded)
-                          : const Icon(Icons.calendar_view_week_outlined),
-                    ),
-                    Tab(
-                      icon: _viewIndex == 2
-                          ? const Icon(Icons.calendar_view_month_rounded)
-                          : const Icon(Icons.calendar_view_month_outlined),
-                    ),
-                  ],
-                ),
-              ),
-              body: TabBarView(
-                children: [
-                  DayView<Tuple<int?, Meal>>(
-                    onEventTap: (data, time) {
-                      _onEventTap(data, time);
-                    },
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //   return const CircularProgressIndicator();
+        // } else if (snapshot.hasError) {
+        //   return Text('Error: ${snapshot.error}');
+        // } else {
+        return DefaultTabController(
+          initialIndex: _viewIndex,
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              elevation: 10,
+              title: TabBar(
+                onTap: (index) {
+                  setState(() {
+                    _viewIndex = index;
+                  });
+                },
+                tabs: <Widget>[
+                  const Tab(
+                    text: "Day",
+                    //icon: _viewIndex == 0
+                    //    ? const Icon(Icons.calendar_view_day_rounded)
+                    //    : const Icon(Icons.calendar_view_day_outlined),
                   ),
-                  WeekView<Tuple<int?, Meal>>(
-                    onEventTap: (data, time) {
-                      _onEventTap(data, time);
-                    },
+                  const Tab(
+                    text: "Week",
+                    //icon: _viewIndex == 1
+                    //    ? const Icon(Icons.calendar_view_week_rounded)
+                    //    : const Icon(Icons.calendar_view_week_outlined),
                   ),
-                  MonthView<Tuple<int?, Meal>>(
-                    onEventTap: (data, time) {
-                      _onEventTap([data], time);
-                    },
-                    onCellTap: (events, date) {
-                      // Implement callback when user taps on a cell.
-                      print(events);
-                    },
-                    useAvailableVerticalSpace: true,
+                  const Tab(
+                    text: "Month",
+                    //icon: _viewIndex == 2
+                    //    ? const Icon(Icons.calendar_view_month_rounded)
+                    //    : const Icon(Icons.calendar_view_month_outlined),
                   ),
                 ],
               ),
             ),
-          );
-        }
+            body: Stack(
+              children: [
+                TabBarView(
+                  children: [
+                    DayView<Tuple<int?, Meal>>(
+                      onEventTap: (data, time) {
+                        _onEventTap(data, time);
+                      },
+                    ),
+                    WeekView<Tuple<int?, Meal>>(
+                      onEventTap: (data, time) {
+                        _onEventTap(data, time);
+                      },
+                    ),
+                    MonthView<Tuple<int?, Meal>>(
+                      onEventTap: (data, time) {
+                        _onEventTap([data], time);
+                      },
+                      onCellTap: (events, date) {
+                        // Implement callback when user taps on a cell.
+                        print(events);
+                      },
+                      useAvailableVerticalSpace: true,
+                    ),
+                  ],
+                ),
+                snapshot.connectionState == ConnectionState.waiting
+                    ? const Center(child: CircularProgressIndicator())
+                    : Container(),
+                snapshot.hasError
+                    ? Center(
+                        child: AlertDialog(
+                          title: const Text("An error has occurred!"),
+                          content: Text(snapshot.error!.toString()),
+                        ),
+                      )
+                    : Container(),
+              ],
+            ),
+          ),
+        );
       },
     );
   }
