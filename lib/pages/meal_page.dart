@@ -2,15 +2,16 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:meal_planner/data/ingredient.dart';
+import 'package:meal_planner/data/meal_ingredient.dart';
+import 'package:meal_planner/data/tuple.dart';
 import 'package:meal_planner/database/meal_planner_database_helper.dart';
-import 'package:meal_planner/toast.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
 import '../data/meal.dart';
-import '../forms/add_meal_form.dart';
-import '../forms/dialogs/edit_meal_dialog.dart';
+import '../forms/meal_form.dart';
 import '../forms/dialogs/random_meal_dialog.dart';
 
 class MealPage extends StatefulWidget {
@@ -25,6 +26,7 @@ class MealPage extends StatefulWidget {
 class _MealPageState extends State<MealPage> {
   List<Meal> _meals = [];
   Random _rand = Random();
+  final _myController = TextEditingController();
 
   void _addMeal(Meal meal) {
     setState(() {
@@ -43,25 +45,12 @@ class _MealPageState extends State<MealPage> {
     await database.delete("meal", where: "id = ?", whereArgs: [meal.id]);
   }
 
-  void _updateMeal(Meal oldMeal, String newMeal) async {
-    Meal updatedMeal = oldMeal.copyWith(newName: newMeal);
+  void _updateMeal(Meal oldMeal, Meal newMeal) async {
     int index = _meals.indexOf(oldMeal);
     setState(() {
-      _meals[index] = updatedMeal;
+      _meals[index] = newMeal;
     });
-    _updateDB(updatedMeal);
   }
-
-  void _updateDB(Meal changedMeal) async {
-    MealPlannerDatabaseHelper databaseHelper =
-        Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
-            .databaseHelper;
-    Database database = await databaseHelper.database;
-    await database.update("meal", changedMeal.toCompleteMap(),
-        where: "id = ?", whereArgs: [changedMeal.id]);
-  }
-
-  final _myController = TextEditingController();
 
   @override
   void dispose() {
@@ -166,8 +155,32 @@ class _MealPageState extends State<MealPage> {
                                 title: Text(_meals[index].name),
                                 trailing: IconButton(
                                   icon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    _onEdit(_meals[index]);
+                                  onPressed: () async {
+                                    Database db = await databaseProvider
+                                        .databaseHelper.database;
+                                    final mealIngredientDao =
+                                        MealIngredientDao(db);
+                                    final mealIngredients =
+                                        await mealIngredientDao
+                                            .getMealIngredientsOfMeal(
+                                                _meals[index].id ?? -1);
+
+                                    final ingredientDao = IngredientDao(db);
+                                    final List<Tuple<Ingredient, num>>
+                                        ingredientsAmount = await Future.wait(
+                                      mealIngredients.map((mI) async {
+                                        Ingredient ingredient =
+                                            await ingredientDao
+                                                .getIngredient(mI.ingredientId);
+                                        return Tuple(ingredient, mI.amount);
+                                      }).toList(),
+                                    );
+                                    if (context.mounted) {
+                                      _showMealForm(
+                                          context: context,
+                                          meal: _meals[index],
+                                          ingredients: ingredientsAmount);
+                                    }
                                   },
                                 ),
                               ),
@@ -186,53 +199,17 @@ class _MealPageState extends State<MealPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _showAddMealFormDialog(context);
+          _showMealForm(context: context);
         },
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _onEdit(Meal oldMeal) {
-    showDialog<String?>(
-      context: context,
-      builder: (BuildContext context) {
-        return EditMealDialog(
-          oldMeal: oldMeal.name,
-        );
-      },
-    ).then(
-      (newMealName) => {
-        print(newMealName),
-        print(oldMeal.name),
-        if (newMealName != null)
-          {
-            if (newMealName.isNotEmpty)
-              {
-                if (newMealName == oldMeal.name)
-                  {
-                    MealPlannerToast.showShortToast("Meal remained unchanged"),
-                  }
-                else
-                  {
-                    _updateMeal(oldMeal, newMealName),
-                  }
-              }
-            else
-              {
-                MealPlannerToast.showLongToast(
-                    "Did not save, because meal name was empty"),
-              },
-          }
-        else
-          {
-            MealPlannerToast.showShortToast("Canceled"),
-          },
-      },
-    );
-  }
-
-  void _showAddMealFormDialog(BuildContext context) {
+  void _showMealForm(
+      {required BuildContext context,
+      Meal? meal,
+      List<Tuple<Ingredient, num>>? ingredients}) {
     showModalBottomSheet<Meal?>(
       enableDrag: true,
       showDragHandle: true,
@@ -241,11 +218,18 @@ class _MealPageState extends State<MealPage> {
       elevation: 5,
       context: context,
       builder: (BuildContext context) {
-        return AddMealForm();
+        return MealForm(
+          givenMeal: meal,
+          givenIngredientsAmount: ingredients,
+        );
       },
-    ).then((value) {
-      if (value != null) {
-        _addMeal(value);
+    ).then((resultMeal) {
+      if (resultMeal != null) {
+        if (meal != null) {
+          _updateMeal(meal, resultMeal);
+        } else {
+          _addMeal(resultMeal);
+        }
       }
     });
   }

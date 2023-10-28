@@ -116,4 +116,12 @@ class IngredientDao {
       return Ingredient.fromMap(maps[i]);
     });
   }
+
+  Future<List<Ingredient>> getIngredientsByIds(List<int> ids) async {
+    final List<Map<String, dynamic>> maps =
+        await _database.query("ingredient", where: "id = ?", whereArgs: [ids]);
+    return List.generate(maps.length, (i) {
+      return Ingredient.fromMap(maps[i]);
+    });
+  }
 }

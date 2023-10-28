@@ -11,16 +11,22 @@ import '../data/meal.dart';
 import '../data/tuple.dart';
 import 'form_text_input_card.dart';
 
-class AddMealForm extends StatefulWidget {
+class MealForm extends StatefulWidget {
+  const MealForm({this.givenMeal, this.givenIngredientsAmount});
+
+  final Meal? givenMeal;
+  final List<Tuple<Ingredient, num>>? givenIngredientsAmount;
+
   @override
-  State<AddMealForm> createState() => _AddMealFormState();
+  State<MealForm> createState() => _MealFormState();
 }
 
-class _AddMealFormState extends State<AddMealForm> {
+class _MealFormState extends State<MealForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _mealNameController = TextEditingController();
 
   bool _isSubmitting = false;
+  bool _setGivens = false;
 
   // form data
   String _mealName = "";
@@ -42,21 +48,42 @@ class _AddMealFormState extends State<AddMealForm> {
           await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
               .databaseHelper
               .database;
-      Meal dbMeal = await MealDao(database)
-          .insertAndReturnMeal(Meal.create(name: _mealName));
+      if (!_setGivens) {
+        // Add
+        Meal dbMeal = await MealDao(database)
+            .insertAndReturnMeal(Meal.create(name: _mealName));
 
-      final List<MealIngredient> mealIngredients =
-          _selectedIngredientsAndAmount.map((ingredientAndAmount) {
-        return MealIngredient(
-            ingredientId: ingredientAndAmount.item1.id!,
-            mealId: dbMeal.id!,
-            amount: ingredientAndAmount.item2);
-      }).toList();
-      await MealIngredientDao(database).insertMealIngredients(mealIngredients);
-      setState(() {
-        _isSubmitting = false;
-      });
-      return dbMeal;
+        final List<MealIngredient> mealIngredients =
+            _selectedIngredientsAndAmount.map((ingredientAndAmount) {
+          return MealIngredient(
+              ingredientId: ingredientAndAmount.item1.id!,
+              mealId: dbMeal.id!,
+              amount: ingredientAndAmount.item2);
+        }).toList();
+        await MealIngredientDao(database)
+            .insertMealIngredients(mealIngredients);
+        setState(() {
+          _isSubmitting = false;
+        });
+        return dbMeal;
+      } else {
+        //Edit
+        Meal meal = widget.givenMeal!;
+        Meal newMeal = meal.copyWith(newName: _mealName);
+        MealDao(database).updateMeal(newMeal);
+
+        final MealIngredientDao mealIngredientDao = MealIngredientDao(database);
+        mealIngredientDao.deleteMealIngredientsOfMeal(meal.id!);
+        final List<MealIngredient> mealIngredients =
+            _selectedIngredientsAndAmount.map((ingredientAndAmount) {
+          return MealIngredient(
+              ingredientId: ingredientAndAmount.item1.id!,
+              mealId: meal.id!,
+              amount: ingredientAndAmount.item2);
+        }).toList();
+        mealIngredientDao.insertMealIngredients(mealIngredients);
+        return newMeal;
+      }
     }
     setState(() {
       _isSubmitting = false;
@@ -64,12 +91,13 @@ class _AddMealFormState extends State<AddMealForm> {
     return null;
   }
 
-  Future<List<Ingredient>> _loadData(Future<Database> database) async {
-    return IngredientDao(await database).getAllIngredients();
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (widget.givenMeal != null && _setGivens == false) {
+      _mealNameController.text = widget.givenMeal?.name ?? "";
+      _selectedIngredientsAndAmount = widget.givenIngredientsAmount ?? [];
+      _setGivens = true;
+    }
     return Form(
       key: _formKey,
       child: ClipRRect(
@@ -92,7 +120,7 @@ class _AddMealFormState extends State<AddMealForm> {
                         0,
                       ),
                       child: Text(
-                        "Add meal",
+                        widget.givenMeal != null ? "Edit meal" : "Add meal",
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
@@ -153,7 +181,9 @@ class _AddMealFormState extends State<AddMealForm> {
                               },
                               asyncItems: (filterString) async {
                                 List<Ingredient> ingredients =
-                                    await _loadData(db.databaseHelper.database);
+                                    await IngredientDao(
+                                            await db.databaseHelper.database)
+                                        .getAllIngredients();
                                 return ingredients.where((ingredient) {
                                   return ingredient.name
                                           .contains(filterString) &&
@@ -210,10 +240,10 @@ class _AddMealFormState extends State<AddMealForm> {
                                 MealPlannerToast.showLongToast(
                                     "Please check the form and make sure everything is filled out correctly");
                               } else {
-                                Future.delayed(Duration.zero, () {
+                                if (context.mounted) {
                                   Navigator.of(context)
                                       .pop(meal); // Close the dialog
-                                });
+                                }
                               }
                             },
                             child: const Text("Add"),
@@ -295,6 +325,8 @@ class IngredientAmountList extends StatelessWidget {
                               0,
                             ),
                             child: AmountInputField(
+                              initialValue:
+                                  _selectedIngredientsAndAmount[index].item2,
                               suffix: Ingredient.suffixOf(
                                   _selectedIngredientsAndAmount[index]
                                       .item1
@@ -323,11 +355,13 @@ class AmountInputField extends StatefulWidget {
     this.title,
     this.suffix,
     this.onSaved,
+    this.initialValue,
   });
 
   final String? title;
   final String? suffix;
   final void Function(String?)? onSaved;
+  final num? initialValue;
 
   @override
   State<AmountInputField> createState() => _AmountInputFieldState();
@@ -366,7 +400,9 @@ class _AmountInputFieldState extends State<AmountInputField> {
                       errorMaxLines: 4,
                       suffixText: widget.suffix ?? "",
                     ),
-                    initialValue: "0",
+                    initialValue: widget.initialValue != null
+                        ? widget.initialValue.toString()
+                        : "0",
                     onSaved: widget.onSaved,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     keyboardType: TextInputType.number,

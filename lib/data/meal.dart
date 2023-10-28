@@ -68,4 +68,8 @@ class MealDao {
       );
     });
   }
+
+  Future<void> updateMeal(Meal meal) async {
+    _database.update("meal", meal.toCompleteMap(), where: "id = ?", whereArgs: [meal.id!]);
+  }
 }
