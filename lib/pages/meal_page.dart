@@ -70,12 +70,10 @@ class _MealPageState extends State<MealPage> {
       );
       return;
     }
-    int index = _rand.nextInt(_meals.length);
-    Meal meal = _meals[index];
     showDialog(
       context: context,
       builder: (BuildContext builder) {
-        return RandomMealDialog(meal: meal);
+        return RandomMealDialog(meals: _meals, random: _rand,);
       },
     );
   }
