@@ -11,6 +11,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
 import '../data/meal.dart';
+import '../forms/calender_meal_form.dart';
 import '../forms/meal_form.dart';
 import '../forms/dialogs/random_meal_dialog.dart';
 
@@ -153,36 +154,8 @@ class _MealPageState extends State<MealPage> {
                               ),
                               child: ListTile(
                                 title: Text(_meals[index].name),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () async {
-                                    Database db = await databaseProvider
-                                        .databaseHelper.database;
-                                    final mealIngredientDao =
-                                        MealIngredientDao(db);
-                                    final mealIngredients =
-                                        await mealIngredientDao
-                                            .getMealIngredientsOfMeal(
-                                                _meals[index].id ?? -1);
-
-                                    final ingredientDao = IngredientDao(db);
-                                    final List<Tuple<Ingredient, num>>
-                                        ingredientsAmount = await Future.wait(
-                                      mealIngredients.map((mI) async {
-                                        Ingredient ingredient =
-                                            await ingredientDao
-                                                .getIngredient(mI.ingredientId);
-                                        return Tuple(ingredient, mI.amount);
-                                      }).toList(),
-                                    );
-                                    if (context.mounted) {
-                                      _showMealForm(
-                                          context: context,
-                                          meal: _meals[index],
-                                          ingredients: ingredientsAmount);
-                                    }
-                                  },
-                                ),
+                                trailing: _buildMealButtonBar(
+                                    context, index, databaseProvider),
                               ),
                             );
                           },
@@ -202,6 +175,58 @@ class _MealPageState extends State<MealPage> {
           _showMealForm(context: context);
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildMealButtonBar(BuildContext context, int index,
+      MealPlannerDatabaseProvider databaseProvider) {
+    return Card(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit_calendar),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => CalenderMealForm(
+                    meal: _meals[index],
+                  ),
+                ),
+              );
+            },
+          ),
+          const VerticalDivider(
+            indent: 10,
+            endIndent: 10,
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              Database db = await databaseProvider.databaseHelper.database;
+              final mealIngredientDao = MealIngredientDao(db);
+              final mealIngredients = await mealIngredientDao
+                  .getMealIngredientsOfMeal(_meals[index].id ?? -1);
+
+              final ingredientDao = IngredientDao(db);
+              final List<Tuple<Ingredient, num>> ingredientsAmount =
+                  await Future.wait(
+                mealIngredients.map((mI) async {
+                  Ingredient ingredient =
+                      await ingredientDao.getIngredient(mI.ingredientId);
+                  return Tuple(ingredient, mI.amount);
+                }).toList(),
+              );
+              if (context.mounted) {
+                _showMealForm(
+                    context: context,
+                    meal: _meals[index],
+                    ingredients: ingredientsAmount);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

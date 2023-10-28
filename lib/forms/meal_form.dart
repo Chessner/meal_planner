@@ -12,8 +12,11 @@ import '../data/tuple.dart';
 import 'form_text_input_card.dart';
 
 class MealForm extends StatefulWidget {
-  const MealForm({this.givenMeal, this.givenIngredientsAmount});
-
+  const MealForm({this.givenMeal, this.givenIngredientsAmount})
+      : assert(
+            (givenMeal != null && givenIngredientsAmount != null) ||
+                (givenMeal == null && givenIngredientsAmount == null),
+            "Either all or no givenX parameters have to be provided");
   final Meal? givenMeal;
   final List<Tuple<Ingredient, num>>? givenIngredientsAmount;
 
