@@ -77,7 +77,7 @@ class _AddMealFormState extends State<AddMealForm> {
           top: Radius.circular(25),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
           child: Stack(
             children: [
               SingleChildScrollView(
@@ -87,7 +87,7 @@ class _AddMealFormState extends State<AddMealForm> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         8,
-                        8,
+                        0,
                         8,
                         0,
                       ),
@@ -238,6 +238,7 @@ class IngredientAmountList extends StatelessWidget {
 
   final List<Tuple<Ingredient, num>> _selectedIngredientsAndAmount;
   final Function(int) deleteEntry;
+
   @override
   Widget build(BuildContext context) {
     return Card(

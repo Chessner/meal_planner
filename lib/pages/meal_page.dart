@@ -234,6 +234,10 @@ class _MealPageState extends State<MealPage> {
 
   void _showAddMealFormDialog(BuildContext context) {
     showModalBottomSheet<Meal?>(
+      enableDrag: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
       elevation: 5,
       context: context,
       builder: (BuildContext context) {
