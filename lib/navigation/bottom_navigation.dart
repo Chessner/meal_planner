@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meal_planner/pages/calender_page.dart';
 import 'package:meal_planner/pages/ingredients_page.dart';
 import 'package:meal_planner/pages/meal_page.dart';
+import 'package:meal_planner/pages/shopping_page.dart';
 
 const List<Widget> _navigationDestinations = [
   NavigationDestination(
@@ -13,6 +14,11 @@ const List<Widget> _navigationDestinations = [
     selectedIcon: Icon(Icons.set_meal),
     icon: Icon(Icons.set_meal_outlined),
     label: "Meals",
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.shopping_bag),
+    icon: Icon(Icons.shopping_bag_outlined),
+    label: "Shopping List",
   ),
   NavigationDestination(
     selectedIcon: Icon(Icons.calendar_month),
@@ -31,6 +37,7 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
   final List<Widget> _screens = [
     IngredientsPage(),
     const MealPage(title: "Meal List"),
+    ShoppingPage(),
     CalenderPage(),
   ];
 

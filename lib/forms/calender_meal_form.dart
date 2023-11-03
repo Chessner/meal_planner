@@ -59,6 +59,7 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
   bool _initialDescriptionSet = false;
 
   bool _startEndDateOnSameDay = true;
+  bool _addToShoppingList = true;
   bool _isSubmitting = false;
 
   Future<bool> _submit() async {
@@ -408,6 +409,32 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
                         ),
                       ),
                     ],
+                  ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Add ingredients to shopping list?",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Checkbox(
+                                value: _addToShoppingList,
+                                onChanged: (newBool) {
+                                  setState(() {
+                                    _addToShoppingList = newBool ?? false;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
