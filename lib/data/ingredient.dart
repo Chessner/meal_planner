@@ -46,7 +46,6 @@ class Ingredient {
   }
 
   static bool intToBool(int value) {
-    print("intToBool value: $value");
     return value == 1;
   }
 
