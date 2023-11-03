@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meal_planner/forms/ingredient_form.dart';
 import 'package:meal_planner/data/ingredient.dart';
+import 'package:meal_planner/widgets/meal_planner_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -55,32 +56,9 @@ class _IngredientsPageState extends State<IngredientsPage> {
                 _ingredients = snapshot.data!;
                 return CustomScrollView(
                   slivers: [
-                    SliverAppBar(
-                      pinned: true,
-                      expandedHeight: 200.0,
-                      backgroundColor: Theme.of(context).canvasColor,
-                      flexibleSpace: FlexibleSpaceBar(
-                        centerTitle: true,
-                        title: Text("Ingredients",
-                            style: Theme.of(context).textTheme.titleLarge),
-                        background: DecoratedBox(
-                          position: DecorationPosition.foreground,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Theme.of(context).canvasColor,
-                                Colors.transparent
-                              ],
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.center,
-                            ),
-                          ),
-                          child: Image.asset(
-                            'assets/bee.jpg',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
+                    const MealPlannerAppBar(
+                      title: "Ingredients",
+                      imagePath: "assets/vegetable_isle.jpg",
                     ),
                     SliverList(
                       delegate: SliverChildBuilderDelegate(

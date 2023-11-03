@@ -6,6 +6,7 @@ import 'package:meal_planner/data/ingredient.dart';
 import 'package:meal_planner/data/meal_ingredient.dart';
 import 'package:meal_planner/data/tuple.dart';
 import 'package:meal_planner/database/meal_planner_database_helper.dart';
+import 'package:meal_planner/widgets/meal_planner_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -73,7 +74,10 @@ class _MealPageState extends State<MealPage> {
     showDialog(
       context: context,
       builder: (BuildContext builder) {
-        return RandomMealDialog(meals: _meals, random: _rand,);
+        return RandomMealDialog(
+          meals: _meals,
+          random: _rand,
+        );
       },
     );
   }
@@ -99,37 +103,14 @@ class _MealPageState extends State<MealPage> {
                   _meals = meals;
                   return CustomScrollView(
                     slivers: [
-                      SliverAppBar(
-                        pinned: true,
-                        expandedHeight: 200.0,
+                      MealPlannerAppBar(
+                        title: "Meals",
+                        imagePath: "assets/family_meal.jpg",
                         actions: [
                           IconButton(
                               onPressed: _randomMeal,
                               icon: const Icon(Icons.lightbulb))
                         ],
-                        backgroundColor: Theme.of(context).canvasColor,
-                        flexibleSpace: FlexibleSpaceBar(
-                          centerTitle: true,
-                          title: Text(widget.title,
-                              style: Theme.of(context).textTheme.titleLarge),
-                          background: DecoratedBox(
-                            position: DecorationPosition.foreground,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Theme.of(context).canvasColor,
-                                  Colors.transparent
-                                ],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.center,
-                              ),
-                            ),
-                            child: Image.asset(
-                              'assets/bee.jpg',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
                       ),
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
