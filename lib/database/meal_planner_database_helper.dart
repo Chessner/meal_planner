@@ -28,7 +28,7 @@ class MealPlannerDatabaseHelper {
       onConfigure: (db) async {
         await db.execute("PRAGMA foreign_keys = ON");
       },
-      version: 4,
+      version: 5,
     );
     return _database;
   }
@@ -51,6 +51,10 @@ Future<void> _updateDatabase(
   }
   if (fromVersion < 4 && curVersion < toVersion) {
     await _v4(db);
+    curVersion++;
+  }
+  if (fromVersion < 5 && curVersion < toVersion) {
+    await _v5(db);
     curVersion++;
   }
 }
@@ -96,4 +100,23 @@ Future<void> _v4(Database db) async {
     FOREIGN KEY (ingredient_id) REFERENCES ingredient(id) ON DELETE CASCADE,
     FOREIGN KEY (meal_id) REFERENCES meal(id) ON DELETE CASCADE
   )""");
+}
+
+Future<void> _v5(Database db) async {
+  await db.execute("""
+    CREATE TABLE shopping_list(
+      id INTEGER PRIMARY KEY,
+      ingredient_id INTEGER,
+      amount REAL,
+      FOREIGN KEY (ingredient_id) REFERENCES ingredient(id) ON DELETE CASCADE
+    )""");
+  var ingredientIds = await db.query("ingredient",
+      columns: ["id"], where: "include_in_shopping = 1");
+  for (var map in ingredientIds) {
+    var shoppingItem = {
+      "ingredient_id": map["id"],
+      "amount": 0,
+    };
+    db.insert("shopping_list", shoppingItem);
+  }
 }
