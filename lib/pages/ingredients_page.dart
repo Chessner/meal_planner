@@ -66,12 +66,6 @@ class _IngredientsPageState extends State<IngredientsPage> {
                           return Dismissible(
                             key: Key(_ingredients[index].id.toString()),
                             direction: DismissDirection.startToEnd,
-                            onUpdate: (details) {
-                              print("onUpdate ${details.progress}");
-                            },
-                            onResize: () {
-                              print("onResize");
-                            },
                             onDismissed: (direction) async {
                               IngredientDao(
                                       await mDbProvider.databaseHelper.database)

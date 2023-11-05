@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meal_planner/data/ingredient.dart';
+import 'package:meal_planner/data/shopping_item.dart';
 import 'package:meal_planner/database/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -56,6 +57,10 @@ class _IngredientDialogState extends State<IngredientDialog> {
             unit: _chosenUnit,
             includeInShopping: _shoppable ?? true));
         submittedIngredient = await ingredientDao.getIngredient(id);
+        if (submittedIngredient.includeInShopping) {
+          await ShoppingItemDao(database)
+              .insertShoppingItem(id: submittedIngredient.id!, amount: 0);
+        }
       }
       Future.delayed(Duration.zero, () {
         Navigator.of(context).pop(submittedIngredient);
@@ -138,7 +143,8 @@ class _IngredientDialogState extends State<IngredientDialog> {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: Checkbox(
-                              value: widget.ingredient?.includeInShopping ?? true,
+                              value:
+                                  widget.ingredient?.includeInShopping ?? true,
                               onChanged: (newBool) {
                                 setState(() {
                                   _shoppable = newBool ?? true;
