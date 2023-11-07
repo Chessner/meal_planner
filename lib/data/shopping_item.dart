@@ -49,4 +49,10 @@ class ShoppingItemDao {
         "UPDATE shopping_list SET amount = amount + ? WHERE ingredient_id = ?",
         [toAdd.amount, toAdd.ingredientId]);
   }
+
+  Future<void> setAmountTo({required ShoppingItem setTo}) async {
+    await _database.rawUpdate(
+        "UPDATE shopping_list SET amount = ? WHERE ingredient_id = ?",
+        [setTo.amount, setTo.ingredientId]);
+  }
 }

@@ -107,9 +107,11 @@ class _MealPageState extends State<MealPage> {
                         title: "Meals",
                         imagePath: "assets/family_meal.jpg",
                         actions: [
-                          IconButton(
-                              onPressed: _randomMeal,
-                              icon: const Icon(Icons.lightbulb))
+                          Card(
+                            child: IconButton(
+                                onPressed: _randomMeal,
+                                icon: const Icon(Icons.lightbulb)),
+                          )
                         ],
                       ),
                       SliverList(
