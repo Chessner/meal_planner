@@ -1,20 +1,28 @@
-import 'package:meal_planner/data/ingredient.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ShoppingItem {
-  final Ingredient ingredient;
+  final int? id;
+  final int ingredientId;
   final num amount;
 
   ShoppingItem._({
-    required this.ingredient,
+    required this.id,
+    required this.ingredientId,
     required this.amount,
   });
 
   factory ShoppingItem.create({
-    required ingredient,
-    required amount,
+    required int ingredientId,
+    required num amount,
   }) {
-    return ShoppingItem._(ingredient: ingredient, amount: amount);
+    return ShoppingItem._(id: null, ingredientId: ingredientId, amount: amount);
+  }
+
+  static ShoppingItem fromMap(Map<String, dynamic> map) {
+    return ShoppingItem._(
+        id: map["id"],
+        ingredientId: map["ingredient_id"],
+        amount: map["amount"]);
   }
 }
 
@@ -24,11 +32,15 @@ class ShoppingItemDao {
 
   ShoppingItemDao(this._database);
 
-  Future<void> insertShoppingItem(
-      {required int id, required num amount}) async {
+  Future<void> insertShoppingItem({required ShoppingItem item}) async {
     await _database.insert(_tableName, {
-      "ingredient_id": id,
-      "amount": amount,
+      "ingredient_id": item.ingredientId,
+      "amount": item.amount,
     });
+  }
+
+  Future<List<ShoppingItem>> getAllWithAmountGreater0() async {
+    final maps = await _database.query(_tableName, where: "amount > 0.0");
+    return maps.map((map) => ShoppingItem.fromMap(map)).toList();
   }
 }

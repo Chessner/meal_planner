@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meal_planner/data/ingredient.dart';
+import 'package:meal_planner/data/shopping_ingredient.dart';
 import 'package:meal_planner/data/shopping_item.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -13,15 +14,25 @@ class ShoppingPage extends StatefulWidget {
 }
 
 class _ShoppingPageState extends State<ShoppingPage> {
-  List<ShoppingItem> _shoppingItems = [];
+  List<ShoppingIngredient> _shoppingIngredients = [];
 
-  Future<List<ShoppingItem>> _loadData(Future<Database> database) async {
-    return [
-      ShoppingItem.create(
-          ingredient: Ingredient.create(
-              name: "Zwiebel", unit: Unit.pieces, includeInShopping: true),
-          amount: 3),
-    ];
+  Future<void> _loadData(Future<Database> fDatabase) async {
+    Database database = await fDatabase;
+    ShoppingItemDao shoppingItemDao = ShoppingItemDao(database);
+    IngredientDao ingredientDao = IngredientDao(database);
+    final List<ShoppingItem> shoppingItems =
+        await shoppingItemDao.getAllWithAmountGreater0();
+    final List<ShoppingIngredient> shoppingIngredients = await Future.wait(
+      shoppingItems.map(
+        (sI) async {
+          return ShoppingIngredient(
+            item: sI,
+            ingredient: await ingredientDao.getIngredient(sI.ingredientId),
+          );
+        },
+      ),
+    );
+    _shoppingIngredients = shoppingIngredients;
   }
 
   @override
@@ -30,7 +41,7 @@ class _ShoppingPageState extends State<ShoppingPage> {
       body: Consumer<MealPlannerDatabaseProvider>(
         builder: (BuildContext context, MealPlannerDatabaseProvider mDbProvider,
             Widget? child) {
-          return FutureBuilder<List<ShoppingItem>>(
+          return FutureBuilder<void>(
             future: _loadData(mDbProvider.databaseHelper.database),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -38,7 +49,6 @@ class _ShoppingPageState extends State<ShoppingPage> {
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
-                _shoppingItems = snapshot.data!;
                 return CustomScrollView(
                   slivers: [
                     const MealPlannerAppBar(
@@ -53,8 +63,9 @@ class _ShoppingPageState extends State<ShoppingPage> {
                               value: false,
                               onChanged: (_) {},
                             ),
-                            title: Text(_shoppingItems[index].ingredient.name),
-                            subtitle: Text(_shoppingItems[index]
+                            title: Text(
+                                _shoppingIngredients[index].ingredient.name),
+                            subtitle: Text(_shoppingIngredients[index]
                                 .ingredient
                                 .unit
                                 .name
@@ -65,7 +76,10 @@ class _ShoppingPageState extends State<ShoppingPage> {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    _shoppingItems[index].amount.toString(),
+                                    _shoppingIngredients[index]
+                                        .item
+                                        .amount
+                                        .toString(),
                                     style:
                                         Theme.of(context).textTheme.bodyLarge,
                                   ),
@@ -92,7 +106,7 @@ class _ShoppingPageState extends State<ShoppingPage> {
                             ),
                           );
                         },
-                        childCount: _shoppingItems.length,
+                        childCount: _shoppingIngredients.length,
                       ),
                     ),
                   ],

@@ -19,8 +19,6 @@ class IngredientDialog extends StatefulWidget {
 class _IngredientDialogState extends State<IngredientDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  //final TextEditingController _ingredientNameController =
-  //    TextEditingController();
   bool _isSubmitting = false;
   Unit? _chosenUnit;
   String _chosenName = "";
@@ -58,8 +56,11 @@ class _IngredientDialogState extends State<IngredientDialog> {
             includeInShopping: _shoppable ?? true));
         submittedIngredient = await ingredientDao.getIngredient(id);
         if (submittedIngredient.includeInShopping) {
-          await ShoppingItemDao(database)
-              .insertShoppingItem(id: submittedIngredient.id!, amount: 0);
+          await ShoppingItemDao(database).insertShoppingItem(
+              item: ShoppingItem.create(
+            ingredientId: submittedIngredient.id!,
+            amount: 0,
+          ));
         }
       }
       Future.delayed(Duration.zero, () {
