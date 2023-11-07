@@ -43,4 +43,10 @@ class ShoppingItemDao {
     final maps = await _database.query(_tableName, where: "amount > 0.0");
     return maps.map((map) => ShoppingItem.fromMap(map)).toList();
   }
+
+  Future<void> addAmount({required ShoppingItem toAdd}) async {
+    await _database.rawUpdate(
+        "UPDATE shopping_list SET amount = amount + ? WHERE ingredient_id = ?",
+        [toAdd.amount, toAdd.ingredientId]);
+  }
 }

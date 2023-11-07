@@ -2,13 +2,15 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:meal_planner/data/calendar_event.dart';
 import 'package:meal_planner/data/meal.dart';
+import 'package:meal_planner/data/meal_ingredient.dart';
+import 'package:meal_planner/data/shopping_item.dart';
 import 'package:meal_planner/data/tuple.dart';
 import 'package:meal_planner/toast.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
 import 'form_text_input_card.dart';
-
 
 class CalenderMealForm extends StatefulWidget {
   const CalenderMealForm(
@@ -20,7 +22,23 @@ class CalenderMealForm extends StatefulWidget {
       this.initialEndTime,
       this.initialTitle,
       this.initialDescription,
-      this.calendarEventId});
+      this.calendarEventId})
+      : assert(
+            (initialStartDate != null &&
+                    initialEndDate != null &&
+                    initialStartTime != null &&
+                    initialEndTime != null &&
+                    initialTitle != null &&
+                    initialDescription != null &&
+                    calendarEventId != null) ||
+                (initialStartDate == null &&
+                    initialEndDate == null &&
+                    initialStartTime == null &&
+                    initialEndTime == null &&
+                    initialTitle == null &&
+                    initialDescription == null &&
+                    calendarEventId == null),
+            "Either no or all optional (initial) values have to be provided");
 
   final Meal meal;
   final int? calendarEventId;
@@ -100,12 +118,29 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
       endTime: endDateTime,
       event: Tuple(widget.calendarEventId, widget.meal),
     );
-    final calendarEvent = CalendarEvent.fromCalendarEventData(ced);
-    final calendarEventDAO = CalendarEventDao(
+
+    Database database =
         await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
             .databaseHelper
-            .database);
+            .database;
+
+    final calendarEvent = CalendarEvent.fromCalendarEventData(ced);
+    final calendarEventDAO = CalendarEventDao(database);
     await calendarEventDAO.insertCalendarEvent(calendarEvent);
+
+    if (!_initialStartDateSet && _addToShoppingList) {
+      // Add ingredients to shopping list
+      MealIngredientDao mealIngredientDao = MealIngredientDao(database);
+      ShoppingItemDao shoppingItemDao = ShoppingItemDao(database);
+      List<MealIngredient> mealIngredients =
+          await mealIngredientDao.getMealIngredientsOfMeal(widget.meal.id!);
+
+      await Future.wait(mealIngredients.map((mI) async {
+        shoppingItemDao.addAmount(
+            toAdd: ShoppingItem.create(
+                ingredientId: mI.ingredientId, amount: mI.amount));
+      }));
+    }
 
     //Update calendar if event is not new
     if (_initialStartDateSet) {
@@ -150,14 +185,14 @@ class _CalenderMealFormState extends State<CalenderMealForm> {
       if (widget.initialTitle != null && !_initialTitleSet) {
         _mealNameController.text = widget.initialTitle!;
         _initialTitleSet = true;
-      } else if(!_initialTitleSet) {
+      } else if (!_initialTitleSet) {
         _mealNameController.text = widget.meal.name;
         _initialTitleSet = true;
       }
       if (widget.initialDescription != null && !_initialDescriptionSet) {
         _descriptionController.text = widget.initialDescription!;
         _initialDescriptionSet = true;
-      } else if(!_initialDescriptionSet) {
+      } else if (!_initialDescriptionSet) {
         _descriptionController.text = "";
         _initialDescriptionSet = true;
       }
