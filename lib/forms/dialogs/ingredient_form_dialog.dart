@@ -4,7 +4,7 @@ import 'package:meal_planner/data/shopping_item.dart';
 import 'package:meal_planner/database/meal_planner_database_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'form_text_input_card.dart';
+import '../form_text_input_card.dart';
 
 class IngredientDialog extends StatefulWidget {
   IngredientDialog({this.ingredient, required this.title});

@@ -158,14 +158,19 @@ class ShoppingList extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                          onPressed: () {}, icon: const Icon(Icons.remove)),
+                          onPressed: () {
+                            _showAmountEditDialog(context);
+                          },
+                          icon: const Icon(Icons.remove)),
                       const VerticalDivider(
                         indent: 10,
                         endIndent: 10,
                       ),
                       IconButton(
                         icon: const Icon(Icons.add),
-                        onPressed: () {},
+                        onPressed: () {
+                          _showAmountEditDialog(context);
+                        },
                       ),
                     ],
                   ),
@@ -176,6 +181,15 @@ class ShoppingList extends StatelessWidget {
         },
         childCount: _shoppingIngredients.length,
       ),
+    );
+  }
+
+  void _showAmountEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog();
+      },
     );
   }
 }
