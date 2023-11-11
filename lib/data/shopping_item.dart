@@ -18,6 +18,13 @@ class ShoppingItem {
     return ShoppingItem._(id: null, ingredientId: ingredientId, amount: amount);
   }
 
+  ShoppingItem copyWith({int? ingredientId, num? amount}) {
+    return ShoppingItem._(
+        id: id,
+        ingredientId: ingredientId ?? this.ingredientId,
+        amount: amount ?? this.amount);
+  }
+
   static ShoppingItem fromMap(Map<String, dynamic> map) {
     return ShoppingItem._(
         id: map["id"],

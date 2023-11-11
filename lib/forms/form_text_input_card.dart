@@ -8,6 +8,7 @@ class FormTextInputCard extends StatelessWidget {
     required this.title,
     this.controller,
     this.initValue,
+    this.leading,
   });
 
   final void Function(String?)? onSaved;
@@ -15,6 +16,7 @@ class FormTextInputCard extends StatelessWidget {
   final String title;
   final TextEditingController? controller;
   final String? initValue;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +29,21 @@ class FormTextInputCard extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: Text(title),
             ),
-            TextFormField(
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              onSaved: onSaved,
-              controller: controller,
-              validator: validator,
-              initialValue: initValue,
+            Row(
+              children: [
+                Container(
+                  child: leading,
+                ),
+                Expanded(
+                  child: TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: onSaved,
+                    controller: controller,
+                    validator: validator,
+                    initialValue: initValue,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

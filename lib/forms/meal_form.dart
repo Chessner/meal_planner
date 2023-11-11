@@ -249,7 +249,8 @@ class _MealFormState extends State<MealForm> {
                                 }
                               }
                             },
-                            child: Text(widget.givenMeal != null ? "Save" : "Add"),
+                            child:
+                                Text(widget.givenMeal != null ? "Save" : "Add"),
                           ),
                   ],
                 ),
@@ -359,8 +360,10 @@ class AmountInputField extends StatefulWidget {
     this.suffix,
     this.onSaved,
     this.initialValue,
+    this.leading,
   });
 
+  final Widget? leading;
   final String? title;
   final String? suffix;
   final void Function(String?)? onSaved;
@@ -381,6 +384,9 @@ class _AmountInputFieldState extends State<AmountInputField> {
         widget.title != null ? Text(widget.title!) : Container(),
         Row(
           children: [
+            Container(
+              child: widget.leading,
+            ),
             Expanded(
               flex: 3,
               child: Column(
@@ -416,7 +422,7 @@ class _AmountInputFieldState extends State<AmountInputField> {
                       if (double.tryParse(value.replaceAll(",", ".")) == null) {
                         return "Please enter a valid number.";
                       }
-                      if (value == "0") {
+                      if (value == "0" || value == "0." || value == "0,") {
                         return "Amount cannot be 0.";
                       }
                       return null;

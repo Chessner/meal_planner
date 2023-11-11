@@ -3,6 +3,7 @@ import 'package:meal_planner/data/ingredient.dart';
 import 'package:meal_planner/data/shopping_ingredient.dart';
 import 'package:meal_planner/data/shopping_item.dart';
 import 'package:meal_planner/data/tuple.dart';
+import 'package:meal_planner/forms/dialogs/shopping_amount_edit_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -99,7 +100,9 @@ class _ShoppingPageState extends State<ShoppingPage> {
                         )
                       ],
                     ),
-                    ShoppingList(shoppingIngredients: _shoppingIngredients),
+                    ShoppingList(
+                      shoppingIngredients: _shoppingIngredients,
+                    ),
                   ],
                 );
               }
@@ -115,7 +118,7 @@ class _ShoppingPageState extends State<ShoppingPage> {
   }
 }
 
-class ShoppingList extends StatelessWidget {
+class ShoppingList extends StatefulWidget {
   const ShoppingList({
     super.key,
     required List<Tuple<ShoppingIngredient, bool>> shoppingIngredients,
@@ -123,6 +126,11 @@ class ShoppingList extends StatelessWidget {
 
   final List<Tuple<ShoppingIngredient, bool>> _shoppingIngredients;
 
+  @override
+  State<ShoppingList> createState() => _ShoppingListState();
+}
+
+class _ShoppingListState extends State<ShoppingList> {
   @override
   Widget build(BuildContext context) {
     return SliverList(
@@ -133,64 +141,121 @@ class ShoppingList extends StatelessWidget {
               initChecked: false,
               index: index,
               onCheckboxChanged: (index, checked) {
-                _shoppingIngredients[index].item2 = checked;
+                widget._shoppingIngredients[index].item2 = checked;
               },
             ),
-            title: Text(_shoppingIngredients[index].item1.ingredient.name),
-            subtitle: Text(_shoppingIngredients[index]
-                .item1
-                .ingredient
-                .unit
-                .name
+            title:
+                Text(widget._shoppingIngredients[index].item1.ingredient.name),
+            subtitle: Text(widget
+                ._shoppingIngredients[index].item1.ingredient.unit.name
                 .toUpperCase()),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    _shoppingIngredients[index].item1.item.amount.toString(),
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                Card(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            _showAmountEditDialog(context);
-                          },
-                          icon: const Icon(Icons.remove)),
-                      const VerticalDivider(
-                        indent: 10,
-                        endIndent: 10,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          _showAmountEditDialog(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            trailing: AmountShowerEditor(
+              shoppingIngredient: widget._shoppingIngredients[index].item1,
+              onAmountEmpty: () {
+                setState(() {
+                  widget._shoppingIngredients.removeAt(index);
+                });
+              },
             ),
           );
         },
-        childCount: _shoppingIngredients.length,
+        childCount: widget._shoppingIngredients.length,
       ),
     );
   }
+}
 
-  void _showAmountEditDialog(BuildContext context) {
-    showDialog(
+class AmountShowerEditor extends StatefulWidget {
+  const AmountShowerEditor({
+    super.key,
+    required this.shoppingIngredient,
+    required this.onAmountEmpty,
+  });
+
+  final Function onAmountEmpty;
+  final ShoppingIngredient shoppingIngredient;
+
+  @override
+  State<AmountShowerEditor> createState() => _AmountShowerEditorState();
+}
+
+class _AmountShowerEditorState extends State<AmountShowerEditor> {
+  late ShoppingIngredient shoppingIngredientState;
+  bool initDone = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!initDone) {
+      setState(() {
+        initDone = true;
+        shoppingIngredientState = widget.shoppingIngredient;
+      });
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            shoppingIngredientState.item.amount.toString(),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+        Card(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    _showAmountEditDialog(
+                      context,
+                      AmountEdit.minus,
+                      shoppingIngredientState,
+                    );
+                  },
+                  icon: const Icon(Icons.remove)),
+              const VerticalDivider(
+                indent: 10,
+                endIndent: 10,
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  _showAmountEditDialog(
+                    context,
+                    AmountEdit.plus,
+                    shoppingIngredientState,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showAmountEditDialog(BuildContext context, AmountEdit editType,
+      ShoppingIngredient shoppingIngredient) async {
+    ShoppingItem? newItem = await showDialog<ShoppingItem?>(
       context: context,
       builder: (BuildContext context) {
-        return SimpleDialog();
+        return ShoppingAmountEditDialog(
+          editType: editType,
+          shoppingIngredient: shoppingIngredient,
+        );
       },
     );
+    if (newItem != null) {
+      if (newItem.amount <= 0) {
+        widget.onAmountEmpty();
+        return;
+      }
+      setState(() {
+        shoppingIngredientState =
+            shoppingIngredientState.copyWith(item: newItem);
+      });
+    }
   }
 }
 

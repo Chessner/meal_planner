@@ -6,4 +6,9 @@ class ShoppingIngredient {
   final Ingredient ingredient;
 
   ShoppingIngredient({required this.item, required this.ingredient});
+
+  ShoppingIngredient copyWith({ShoppingItem? item, Ingredient? ingredient}) {
+    return ShoppingIngredient(
+        item: item ?? this.item, ingredient: ingredient ?? this.ingredient);
+  }
 }
