@@ -249,7 +249,7 @@ class _MealFormState extends State<MealForm> {
                                 }
                               }
                             },
-                            child: const Text("Add"),
+                            child: Text(widget.givenMeal != null ? "Save" : "Add"),
                           ),
                   ],
                 ),
@@ -281,7 +281,7 @@ class IngredientAmountList extends StatelessWidget {
             ? Row(
                 children: [
                   Text(
-                    "No meals added!",
+                    "No ingredients added!",
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ],
