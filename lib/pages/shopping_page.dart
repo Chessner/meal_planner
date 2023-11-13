@@ -3,6 +3,7 @@ import 'package:meal_planner/data/ingredient.dart';
 import 'package:meal_planner/data/shopping_ingredient.dart';
 import 'package:meal_planner/data/shopping_item.dart';
 import 'package:meal_planner/data/tuple.dart';
+import 'package:meal_planner/forms/dialogs/shopping_amount_create_dialog.dart';
 import 'package:meal_planner/forms/dialogs/shopping_amount_edit_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -44,19 +45,19 @@ class _ShoppingPageState extends State<ShoppingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<MealPlannerDatabaseProvider>(
-        builder: (BuildContext context, MealPlannerDatabaseProvider mDbProvider,
-            Widget? child) {
-          return FutureBuilder<void>(
-            future: _loadData(mDbProvider.databaseHelper.database),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return CustomScrollView(
+    return Consumer<MealPlannerDatabaseProvider>(
+      builder: (BuildContext context, MealPlannerDatabaseProvider mDbProvider,
+          Widget? child) {
+        return FutureBuilder<void>(
+          future: _loadData(mDbProvider.databaseHelper.database),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              return Scaffold(
+                body: CustomScrollView(
                   slivers: [
                     MealPlannerAppBar(
                       title: "Shopping List",
@@ -104,17 +105,113 @@ class _ShoppingPageState extends State<ShoppingPage> {
                       shoppingIngredients: _shoppingIngredients,
                     ),
                   ],
-                );
-              }
-            },
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext builder) {
+                        return ToAddShoppingList(
+                          ignoredShoppingIngredients:
+                              _shoppingIngredients.map((e) => e.item1).toList(),
+                          onShoppingIngredientAdded: (sI) {
+                            setState(() {
+                              _shoppingIngredients.add(Tuple(sI, false));
+                            });
+                          },
+                        );
+                      },
+                    );
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+class ToAddShoppingList extends StatefulWidget {
+  const ToAddShoppingList({
+    super.key,
+    required List<ShoppingIngredient> ignoredShoppingIngredients,
+    required this.onShoppingIngredientAdded,
+  }) : _ignoredShoppingIngredients = ignoredShoppingIngredients;
+  final Function(ShoppingIngredient) onShoppingIngredientAdded;
+  final List<ShoppingIngredient> _ignoredShoppingIngredients;
+
+  @override
+  State<ToAddShoppingList> createState() => _ToAddShoppingListState();
+}
+
+class _ToAddShoppingListState extends State<ToAddShoppingList> {
+  List<ShoppingIngredient> _addableShoppingIngredients = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: _addableShoppingIngredients.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          onTap: () {
+            _showShoppingCreateDialog(
+                context, _addableShoppingIngredients[index]);
+          },
+          title: Text(_addableShoppingIngredients[index].ingredient.name),
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initState();
+  }
+
+  void _initState() async {
+    Database database =
+        await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
+            .databaseHelper
+            .database;
+    ShoppingItemDao shoppingItemDao = ShoppingItemDao(database);
+    IngredientDao ingredientDao = IngredientDao(database);
+    final List<ShoppingItem> shoppingItems =
+        await shoppingItemDao.getAllWithIdNotIn(
+            widget._ignoredShoppingIngredients.map((e) => e.item.id!).toList());
+    final List<ShoppingIngredient> shoppingIngredients = await Future.wait(
+      shoppingItems.map(
+        (sI) async {
+          return ShoppingIngredient(
+            item: sI,
+            ingredient: await ingredientDao.getIngredient(sI.ingredientId),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
-      ),
     );
+    setState(() {
+      _addableShoppingIngredients = shoppingIngredients;
+    });
+  }
+
+  void _showShoppingCreateDialog(
+      BuildContext context, ShoppingIngredient shoppingIngredient) {
+    showDialog<ShoppingItem>(
+      context: context,
+      builder: (BuildContext context) {
+        return ShoppingAmountCreateDialog(
+          shoppingIngredient: shoppingIngredient,
+        );
+      },
+    ).then((item) {
+      setState(() {
+        _addableShoppingIngredients.remove(shoppingIngredient);
+      });
+      widget.onShoppingIngredientAdded(shoppingIngredient.copyWith(item: item));
+    });
   }
 }
 

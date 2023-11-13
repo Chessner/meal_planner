@@ -51,6 +51,15 @@ class ShoppingItemDao {
     return maps.map((map) => ShoppingItem.fromMap(map)).toList();
   }
 
+  Future<List<ShoppingItem>> getAllWithIdNotIn(
+      List<int> ids) async {
+    var placeholders = List<String>.generate(ids.length, (index) => '?').join(',');
+    final maps = await _database.rawQuery(
+        "SELECT * FROM shopping_list WHERE id NOT IN ($placeholders)",
+        ids);
+    return maps.map((map) => ShoppingItem.fromMap(map)).toList();
+  }
+
   Future<void> addAmount({required ShoppingItem toAdd}) async {
     await _database.rawUpdate(
         "UPDATE shopping_list SET amount = amount + ? WHERE ingredient_id = ?",
