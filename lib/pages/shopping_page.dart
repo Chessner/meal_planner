@@ -149,20 +149,39 @@ class ToAddShoppingList extends StatefulWidget {
 
 class _ToAddShoppingListState extends State<ToAddShoppingList> {
   List<ShoppingIngredient> _addableShoppingIngredients = [];
+  List<ShoppingIngredient> _filteredAddableShoppingIngredients = [];
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: _addableShoppingIngredients.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          onTap: () {
-            _showShoppingCreateDialog(
-                context, _addableShoppingIngredients[index]);
-          },
-          title: Text(_addableShoppingIngredients[index].ingredient.name),
-        );
-      },
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            onChanged: (value) {
+              _searchData(value);
+            },
+            decoration: const InputDecoration(
+              labelText: 'Search',
+              suffixIcon: Icon(Icons.search),
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _filteredAddableShoppingIngredients.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                onTap: () {
+                  _showShoppingCreateDialog(
+                      context, _filteredAddableShoppingIngredients[index]);
+                },
+                title: Text(_filteredAddableShoppingIngredients[index].ingredient.name),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -194,7 +213,27 @@ class _ToAddShoppingListState extends State<ToAddShoppingList> {
     );
     setState(() {
       _addableShoppingIngredients = shoppingIngredients;
+      _filteredAddableShoppingIngredients = shoppingIngredients;
     });
+  }
+
+  void _searchData(String query) {
+    if (query.isNotEmpty) {
+      List<ShoppingIngredient> tmpList = [];
+      for (ShoppingIngredient ingredient in _addableShoppingIngredients) {
+        if (ingredient.ingredient.name.toLowerCase().contains(query.toLowerCase())) {
+          tmpList.add(ingredient);
+        }
+      }
+
+      setState(() {
+        _filteredAddableShoppingIngredients = tmpList;
+      });
+    } else {
+      setState(() {
+        _filteredAddableShoppingIngredients = _addableShoppingIngredients;
+      });
+    }
   }
 
   void _showShoppingCreateDialog(
@@ -209,6 +248,7 @@ class _ToAddShoppingListState extends State<ToAddShoppingList> {
     ).then((item) {
       setState(() {
         _addableShoppingIngredients.remove(shoppingIngredient);
+        _filteredAddableShoppingIngredients.remove(shoppingIngredient);
       });
       widget.onShoppingIngredientAdded(shoppingIngredient.copyWith(item: item));
     });
