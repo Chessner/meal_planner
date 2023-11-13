@@ -173,19 +173,22 @@ class _ToAddShoppingListState extends State<ToAddShoppingList> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: _filteredAddableShoppingIngredients.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                onTap: () {
-                  _showShoppingCreateDialog(
-                      context, _filteredAddableShoppingIngredients[index]);
-                },
-                title: Text(
-                    _filteredAddableShoppingIngredients[index].ingredient.name),
-              );
-            },
-          ),
+          child: _filteredAddableShoppingIngredients.isEmpty
+              ? const Text("No Ingredients found")
+              : ListView.builder(
+                  itemCount: _filteredAddableShoppingIngredients.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      onTap: () {
+                        _showShoppingCreateDialog(context,
+                            _filteredAddableShoppingIngredients[index]);
+                      },
+                      title: Text(_filteredAddableShoppingIngredients[index]
+                          .ingredient
+                          .name),
+                    );
+                  },
+                ),
         ),
       ],
     );
