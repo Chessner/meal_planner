@@ -20,9 +20,9 @@ class _IngredientDialogState extends State<IngredientDialog> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isSubmitting = false;
-  Unit? _chosenUnit;
+  late Unit _chosenUnit;
   String _chosenName = "";
-  bool? _shoppable;
+  late bool _shoppable;
 
   void _submit() async {
     setState(() {
@@ -45,15 +45,29 @@ class _IngredientDialogState extends State<IngredientDialog> {
         submittedIngredient = widget.ingredient!.copyWith(
             name: _chosenName,
             unit: _chosenUnit,
-            includeInShopping: _shoppable ?? true);
+            includeInShopping: _shoppable);
 
         await ingredientDao.updateIngredient(submittedIngredient);
+        if (!widget.ingredient!.includeInShopping && _shoppable) {
+          // Ingredient wasn't shoppable and now is shoppable
+          await ShoppingItemDao(database).insertShoppingItem(
+            item: ShoppingItem.create(
+              ingredientId: submittedIngredient.id!,
+              amount: 0,
+            ),
+          );
+        } else if (widget.ingredient!.includeInShopping && !_shoppable) {
+          // Ingredient was shoppable but isn't anymore
+          await ShoppingItemDao(database).deleteByIngredientId(
+            ingredientId: widget.ingredient!.id!,
+          );
+        }
       } else {
         //insert
         int id = await ingredientDao.insertIngredient(Ingredient.create(
             name: _chosenName,
             unit: _chosenUnit,
-            includeInShopping: _shoppable ?? true));
+            includeInShopping: _shoppable));
         submittedIngredient = await ingredientDao.getIngredient(id);
         if (submittedIngredient.includeInShopping) {
           await ShoppingItemDao(database).insertShoppingItem(
@@ -71,6 +85,12 @@ class _IngredientDialogState extends State<IngredientDialog> {
     setState(() {
       _isSubmitting = false;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _shoppable = widget.ingredient?.includeInShopping ?? true;
   }
 
   @override
@@ -123,7 +143,7 @@ class _IngredientDialogState extends State<IngredientDialog> {
                           onChanged: (value) {},
                           onSaved: (value) {
                             setState(() {
-                              _chosenUnit = value;
+                              _chosenUnit = value ?? Unit.pieces;
                             });
                           },
                         ),
@@ -144,8 +164,7 @@ class _IngredientDialogState extends State<IngredientDialog> {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: Checkbox(
-                              value:
-                                  widget.ingredient?.includeInShopping ?? true,
+                              value: _shoppable,
                               onChanged: (newBool) {
                                 setState(() {
                                   _shoppable = newBool ?? true;

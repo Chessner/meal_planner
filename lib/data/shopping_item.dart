@@ -51,12 +51,11 @@ class ShoppingItemDao {
     return maps.map((map) => ShoppingItem.fromMap(map)).toList();
   }
 
-  Future<List<ShoppingItem>> getAllWithIdNotIn(
-      List<int> ids) async {
-    var placeholders = List<String>.generate(ids.length, (index) => '?').join(',');
+  Future<List<ShoppingItem>> getAllWithIdNotIn(List<int> ids) async {
+    var placeholders =
+        List<String>.generate(ids.length, (index) => '?').join(',');
     final maps = await _database.rawQuery(
-        "SELECT * FROM shopping_list WHERE id NOT IN ($placeholders)",
-        ids);
+        "SELECT * FROM shopping_list WHERE id NOT IN ($placeholders)", ids);
     return maps.map((map) => ShoppingItem.fromMap(map)).toList();
   }
 
@@ -70,5 +69,10 @@ class ShoppingItemDao {
     await _database.rawUpdate(
         "UPDATE shopping_list SET amount = ? WHERE ingredient_id = ?",
         [setTo.amount, setTo.ingredientId]);
+  }
+
+  Future<void> deleteByIngredientId({required int ingredientId}) async {
+    await _database
+        .delete(_tableName, where: "ingredient_id = ?", whereArgs: [ingredientId]);
   }
 }
