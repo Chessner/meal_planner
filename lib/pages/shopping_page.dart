@@ -176,7 +176,8 @@ class _ToAddShoppingListState extends State<ToAddShoppingList> {
                   _showShoppingCreateDialog(
                       context, _filteredAddableShoppingIngredients[index]);
                 },
-                title: Text(_filteredAddableShoppingIngredients[index].ingredient.name),
+                title: Text(
+                    _filteredAddableShoppingIngredients[index].ingredient.name),
               );
             },
           ),
@@ -221,7 +222,9 @@ class _ToAddShoppingListState extends State<ToAddShoppingList> {
     if (query.isNotEmpty) {
       List<ShoppingIngredient> tmpList = [];
       for (ShoppingIngredient ingredient in _addableShoppingIngredients) {
-        if (ingredient.ingredient.name.toLowerCase().contains(query.toLowerCase())) {
+        if (ingredient.ingredient.name
+            .toLowerCase()
+            .contains(query.toLowerCase())) {
           tmpList.add(ingredient);
         }
       }
@@ -246,6 +249,7 @@ class _ToAddShoppingListState extends State<ToAddShoppingList> {
         );
       },
     ).then((item) {
+      if (item == null) return;
       setState(() {
         _addableShoppingIngredients.remove(shoppingIngredient);
         _filteredAddableShoppingIngredients.remove(shoppingIngredient);
