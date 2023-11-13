@@ -20,6 +20,7 @@ class ShoppingPage extends StatefulWidget {
 class _ShoppingPageState extends State<ShoppingPage> {
   List<Tuple<ShoppingIngredient, bool>> _shoppingIngredients = [];
   bool _initialLoadDone = false;
+  GlobalKey _fabKey = GlobalKey();
 
   Future<void> _loadData(Future<Database> fDatabase) async {
     if (_initialLoadDone) return;
@@ -104,9 +105,13 @@ class _ShoppingPageState extends State<ShoppingPage> {
                     ShoppingList(
                       shoppingIngredients: _shoppingIngredients,
                     ),
+                    const SliverPadding(
+                      padding: EdgeInsets.only(bottom: 56.0),
+                    ),
                   ],
                 ),
                 floatingActionButton: FloatingActionButton(
+                  key: _fabKey,
                   onPressed: () {
                     showModalBottomSheet(
                       context: context,

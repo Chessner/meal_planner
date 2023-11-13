@@ -143,6 +143,9 @@ class _MealPageState extends State<MealPage> {
                           childCount: _meals.length,
                         ),
                       ),
+                      const SliverPadding(
+                        padding: EdgeInsets.only(bottom: 56.0),
+                      ),
                     ],
                   );
                 } else {

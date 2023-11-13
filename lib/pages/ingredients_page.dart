@@ -100,6 +100,9 @@ class _IngredientsPageState extends State<IngredientsPage> {
                         childCount: _ingredients.length,
                       ),
                     ),
+                    const SliverPadding(
+                      padding: EdgeInsets.only(bottom: 56.0),
+                    ),
                   ],
                 );
               }
