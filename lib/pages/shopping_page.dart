@@ -1,3 +1,4 @@
+import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:meal_planner/data/ingredient.dart';
 import 'package:meal_planner/data/shopping_ingredient.dart';
@@ -104,7 +105,9 @@ class _ShoppingPageState extends State<ShoppingPage> {
                         Card(
                           child: IconButton(
                             onPressed: () {
-                              shareContent();
+                              shareContent(_shoppingIngredients
+                                  .map((e) => e.item1)
+                                  .toList());
                             },
                             icon: const Icon(Icons.share),
                           ),
@@ -147,8 +150,12 @@ class _ShoppingPageState extends State<ShoppingPage> {
     );
   }
 
-  void shareContent(){
-    Share.share('Check out this awesome content!', subject: 'Amazing Stuff!');
+  void shareContent(List<ShoppingIngredient> shoppingIngredients) {
+    Share.share(
+        ShoppingIngredient.shareString(
+          shoppingIngredients,
+        ),
+        subject: 'Shopping list created at ${DateTime.now().formatted}');
   }
 }
 
