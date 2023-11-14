@@ -6,6 +6,7 @@ import 'package:meal_planner/data/tuple.dart';
 import 'package:meal_planner/forms/dialogs/shopping_amount_create_dialog.dart';
 import 'package:meal_planner/forms/dialogs/shopping_amount_edit_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
@@ -99,7 +100,15 @@ class _ShoppingPageState extends State<ShoppingPage> {
                             },
                             icon: const Icon(Icons.check_box),
                           ),
-                        )
+                        ),
+                        Card(
+                          child: IconButton(
+                            onPressed: () {
+                              shareContent();
+                            },
+                            icon: const Icon(Icons.share),
+                          ),
+                        ),
                       ],
                     ),
                     ShoppingList(
@@ -136,6 +145,10 @@ class _ShoppingPageState extends State<ShoppingPage> {
         );
       },
     );
+  }
+
+  void shareContent(){
+    Share.share('Check out this awesome content!', subject: 'Amazing Stuff!');
   }
 }
 
