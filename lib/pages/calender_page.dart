@@ -123,7 +123,6 @@ class _CalenderPageState extends State<CalenderPage> {
                       },
                       onCellTap: (events, date) {
                         // Implement callback when user taps on a cell.
-                        print(events);
                       },
                       useAvailableVerticalSpace: true,
                     ),
@@ -156,6 +155,5 @@ class _CalenderPageState extends State<CalenderPage> {
         builder: (BuildContext context) {
           return CalendarEventDialog(event: data);
         });
-    print(data.title);
   }
 }
