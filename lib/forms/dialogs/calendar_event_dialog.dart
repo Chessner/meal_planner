@@ -26,21 +26,24 @@ class CalendarEventDialog extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              icon: const Icon(Icons.delete),
-              color: Colors.red,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                CalendarControllerProvider.of<Tuple<int?, Meal>>(context).controller.remove(event);
-                var db =
-                    await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
-                        .databaseHelper
-                        .database;
-                CalendarEventDao(db)
-                    .removeCalendarEvent(event.event?.item1 ?? -1);
-              },
-            ),
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: const Icon(Icons.delete),
+                color: Colors.red,
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  CalendarControllerProvider.of<Tuple<int?, Meal>>(context)
+                      .controller
+                      .remove(event);
+                  var db = await Provider.of<MealPlannerDatabaseProvider>(
+                          context,
+                          listen: false)
+                      .databaseHelper
+                      .database;
+                  CalendarEventDao(db)
+                      .removeCalendarEvent(event.event?.item1 ?? -1);
+                },
+              ),
             ),
           ),
           Expanded(
@@ -54,7 +57,9 @@ class CalendarEventDialog extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => CalenderMealForm(
                         meal: event.event?.item2 ??
-                            Meal.create(name: event.title),
+                            Meal.create(
+                                name: event.title,
+                                instructions: event.event!.item2.instructions),
                         calendarEventId: event.event?.item1,
                         initialTitle: event.title,
                         initialDescription: event.description,

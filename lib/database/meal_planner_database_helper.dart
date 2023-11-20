@@ -28,7 +28,7 @@ class MealPlannerDatabaseHelper {
       onConfigure: (db) async {
         await db.execute("PRAGMA foreign_keys = ON");
       },
-      version: 5,
+      version: 6,
     );
     return _database;
   }
@@ -55,6 +55,10 @@ Future<void> _updateDatabase(
   }
   if (fromVersion < 5 && curVersion < toVersion) {
     await _v5(db);
+    curVersion++;
+  }
+  if (fromVersion < 6 && curVersion < toVersion) {
+    await _v6(db);
     curVersion++;
   }
 }
@@ -119,4 +123,10 @@ Future<void> _v5(Database db) async {
     };
     db.insert("shopping_list", shoppingItem);
   }
+}
+
+Future<void> _v6(Database db) async {
+  await db.execute("""
+    ALTER TABLE meal ADD COLUMN instructions TEXT DEFAULT "";
+  """);
 }

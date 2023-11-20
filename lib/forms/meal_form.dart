@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -35,7 +37,6 @@ class _MealFormState extends State<MealForm> {
   final ScrollController _scrollController = ScrollController();
 
   bool _isSubmitting = false;
-  bool _setGivens = false;
 
   // form data
   String _mealName = "";
@@ -44,6 +45,13 @@ class _MealFormState extends State<MealForm> {
   @override
   void initState() {
     super.initState();
+    _mealNameController.text = widget.givenMeal?.name ?? "";
+    _selectedIngredientsAndAmount = widget.givenIngredientsAmount ?? [];
+
+    if (widget.givenMeal != null && widget.givenMeal!.instructions.isNotEmpty) {
+      _quillController.document =
+          Document.fromJson(jsonDecode(widget.givenMeal!.instructions));
+    }
     _focusNode.addListener(
       () {
         if (_focusNode.hasFocus) {
@@ -85,10 +93,12 @@ class _MealFormState extends State<MealForm> {
           await Provider.of<MealPlannerDatabaseProvider>(context, listen: false)
               .databaseHelper
               .database;
-      if (!_setGivens) {
+      if (widget.givenMeal == null) {
         // Add
-        Meal dbMeal = await MealDao(database)
-            .insertAndReturnMeal(Meal.create(name: _mealName));
+        Meal dbMeal = await MealDao(database).insertAndReturnMeal(Meal.create(
+            name: _mealName,
+            instructions:
+                jsonEncode(_quillController.document.toDelta().toJson())));
 
         final List<MealIngredient> mealIngredients =
             _selectedIngredientsAndAmount.map((ingredientAndAmount) {
@@ -106,7 +116,10 @@ class _MealFormState extends State<MealForm> {
       } else {
         //Edit
         Meal meal = widget.givenMeal!;
-        Meal newMeal = meal.copyWith(newName: _mealName);
+        Meal newMeal = meal.copyWith(
+            newName: _mealName,
+            newInstructions:
+                jsonEncode(_quillController.document.toDelta().toJson()));
         MealDao(database).updateMeal(newMeal);
 
         final MealIngredientDao mealIngredientDao = MealIngredientDao(database);
@@ -130,13 +143,9 @@ class _MealFormState extends State<MealForm> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.givenMeal != null && _setGivens == false) {
-      _mealNameController.text = widget.givenMeal?.name ?? "";
-      _selectedIngredientsAndAmount = widget.givenIngredientsAmount ?? [];
-      _setGivens = true;
-    }
     return ChangeNotifierProvider(
-      create: (context) => FocusModel(),
+      create: (context) =>
+          FocusModel(nodeAmount: _selectedIngredientsAndAmount.length),
       child: Scaffold(
         body: Form(
           key: _formKey,

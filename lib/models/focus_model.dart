@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
 class FocusModel extends ChangeNotifier {
-  final List<FocusNode> _focusNodes = [];
+  late final List<FocusNode> _focusNodes;
   final FocusNode _title = FocusNode();
+
+
+  FocusModel({required int nodeAmount}) {
+    _focusNodes = List.generate(nodeAmount, (index) => FocusNode());
+  }
 
   void add() {
     FocusNode focusNode = FocusNode();

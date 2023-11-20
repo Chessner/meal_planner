@@ -31,7 +31,7 @@ void main() {
 
       test("Insert and return returns new meal with id", () async {
         MealDao mealDataAccessObject = MealDao(database);
-        Meal mealPreDb = Meal.create(name: "Zwetschkenkuchen");
+        Meal mealPreDb = Meal.create(name: "Zwetschkenkuchen", instructions: "");
         Meal mealPostDb =
         await mealDataAccessObject.insertAndReturnMeal(mealPreDb);
         expect(mealPreDb.name, mealPostDb.name);
