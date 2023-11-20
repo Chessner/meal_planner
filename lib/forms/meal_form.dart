@@ -1,5 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:meal_planner/data/meal_ingredient.dart';
 import 'package:meal_planner/database/meal_planner_database_provider.dart';
 import 'package:meal_planner/toast.dart';
@@ -9,6 +10,7 @@ import 'package:sqflite/sqflite.dart';
 import '../data/ingredient.dart';
 import '../data/meal.dart';
 import '../data/tuple.dart';
+import '../models/focus_model.dart';
 import 'form_text_input_card.dart';
 
 class MealForm extends StatefulWidget {
@@ -27,6 +29,10 @@ class MealForm extends StatefulWidget {
 class _MealFormState extends State<MealForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _mealNameController = TextEditingController();
+  final QuillController _quillController = QuillController.basic();
+  final GlobalKey _quillKey = GlobalKey();
+  final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
 
   bool _isSubmitting = false;
   bool _setGivens = false;
@@ -34,6 +40,34 @@ class _MealFormState extends State<MealForm> {
   // form data
   String _mealName = "";
   List<Tuple<Ingredient, num>> _selectedIngredientsAndAmount = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(
+      () {
+        if (_focusNode.hasFocus) {
+          Future.delayed(
+            const Duration(milliseconds: 400),
+            () {
+              Scrollable.ensureVisible(_quillKey.currentContext!,
+                  alignmentPolicy:
+                      ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+                  curve: Curves.easeInOut,
+                  duration: const Duration(milliseconds: 400));
+            },
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<Meal?> _onSubmit() async {
     if (_formKey.currentState == null) {
@@ -101,161 +135,235 @@ class _MealFormState extends State<MealForm> {
       _selectedIngredientsAndAmount = widget.givenIngredientsAmount ?? [];
       _setGivens = true;
     }
-    return Form(
-      key: _formKey,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(25),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        8,
-                        0,
-                        8,
-                        0,
-                      ),
-                      child: Text(
-                        widget.givenMeal != null ? "Edit meal" : "Add meal",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    FormTextInputCard(
-                      validator: (String? content) {
-                        if (content == null || content.isEmpty) {
-                          return 'Meal name cannot be empty';
-                        }
-                        return null;
-                      },
-                      onSaved: (name) {
-                        _mealName = name ?? "";
-                      },
-                      title: "Name",
-                      controller: _mealNameController,
-                    ),
-                    Consumer<MealPlannerDatabaseProvider>(
-                      builder: (BuildContext context, db, Widget? child) {
-                        return Card(
+    return ChangeNotifierProvider(
+      create: (context) => FocusModel(),
+      child: Scaffold(
+        body: Form(
+          key: _formKey,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(25),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            8,
+                            0,
+                            8,
+                            0,
+                          ),
+                          child: Text(
+                            widget.givenMeal != null ? "Edit meal" : "Add meal",
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                        Consumer<FocusModel>(
+                          builder: (BuildContext context, FocusModel focusModel,
+                              Widget? child) {
+                            return FormTextInputCard(
+                              focusNode: focusModel.titleFNode,
+                              validator: (String? content) {
+                                if (content == null || content.isEmpty) {
+                                  return 'Meal name cannot be empty';
+                                }
+                                return null;
+                              },
+                              onSaved: (name) {
+                                _mealName = name ?? "";
+                              },
+                              title: "Name",
+                              controller: _mealNameController,
+                            );
+                          },
+                        ),
+                        Card(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: DropdownSearch<Ingredient>(
-                              dropdownDecoratorProps:
-                                  const DropDownDecoratorProps(
-                                dropdownSearchDecoration: InputDecoration(
-                                    hintText:
-                                        "Search for and add ingredients!"),
+                            child: QuillProvider(
+                              configurations: QuillConfigurations(
+                                controller: _quillController,
                               ),
-                              onBeforeChange:
-                                  (oldIngredient, newIngredient) async {
-                                setState(() {
-                                  _selectedIngredientsAndAmount
-                                      .add(Tuple(newIngredient!, 0));
-                                });
-                                return false;
-                              },
-                              popupProps: PopupProps.modalBottomSheet(
-                                emptyBuilder: (context, filterString) {
-                                  return const ListTile(
-                                    title: Text("No ingredients found!"),
-                                  );
-                                },
-                                searchFieldProps: const TextFieldProps(
-                                  decoration: InputDecoration(
-                                      hintText:
-                                          "Search for and add ingredients!"),
-                                ),
-                                showSearchBox: true,
-                                searchDelay: Duration.zero,
+                              child: Column(
+                                children: [
+                                  const Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text("Instructions")),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  const QuillToolbar(
+                                      configurations:
+                                          QuillToolbarConfigurations(
+                                              multiRowsDisplay: false)),
+                                  const Divider(),
+                                  Container(
+                                    key: _quillKey,
+                                    child: Consumer<FocusModel>(
+                                      builder: (BuildContext context,
+                                          FocusModel focusModel,
+                                          Widget? child) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            focusModel.unfocusAll();
+                                            _focusNode.requestFocus();
+                                          },
+                                          child: QuillEditor.basic(
+                                            focusNode: _focusNode,
+                                            configurations:
+                                                const QuillEditorConfigurations(
+                                              minHeight: 200,
+                                              maxHeight: 200,
+                                              readOnly: false,
+                                              scrollable: true,
+                                              placeholder:
+                                                  "Add some instructions here...!",
+                                              expands: false,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
-                              enabled: true,
-                              clearButtonProps: const ClearButtonProps(
-                                isVisible: true,
-                                icon: Icon(Icons.cancel_outlined),
-                              ),
-                              filterFn: (ingredient, filter) {
-                                return ingredient.name.contains(filter);
-                              },
-                              asyncItems: (filterString) async {
-                                List<Ingredient> ingredients =
-                                    await IngredientDao(
-                                            await db.databaseHelper.database)
-                                        .getAllIngredients();
-                                return ingredients.where((ingredient) {
-                                  return ingredient.name
-                                          .contains(filterString) &&
-                                      !_selectedIngredientsAndAmount.any(
-                                          (element) =>
-                                              element.item1.id ==
-                                              ingredient.id);
-                                }).toList();
-                              },
-                              compareFn: (ingredient1, ingredient2) {
-                                return ingredient1.id! == ingredient2.id!;
-                              },
-                              itemAsString: (ingredient) {
-                                return ingredient.name;
-                              },
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        Consumer2<MealPlannerDatabaseProvider, FocusModel>(
+                          builder: (BuildContext context, db, focusModel,
+                              Widget? child) {
+                            return Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: DropdownSearch<Ingredient>(
+                                  dropdownDecoratorProps:
+                                      const DropDownDecoratorProps(
+                                    dropdownSearchDecoration: InputDecoration(
+                                        hintText:
+                                            "Search for and add ingredients!"),
+                                  ),
+                                  onBeforeChange:
+                                      (oldIngredient, newIngredient) async {
+                                    focusModel.add();
+                                    setState(() {
+                                      _selectedIngredientsAndAmount
+                                          .add(Tuple(newIngredient!, 0));
+                                    });
+                                    return false;
+                                  },
+                                  popupProps: PopupProps.modalBottomSheet(
+                                    emptyBuilder: (context, filterString) {
+                                      return const ListTile(
+                                        title: Text("No ingredients found!"),
+                                      );
+                                    },
+                                    searchFieldProps: const TextFieldProps(
+                                      decoration: InputDecoration(
+                                          hintText:
+                                              "Search for and add ingredients!"),
+                                    ),
+                                    showSearchBox: true,
+                                    searchDelay: Duration.zero,
+                                  ),
+                                  enabled: true,
+                                  clearButtonProps: const ClearButtonProps(
+                                    isVisible: true,
+                                    icon: Icon(Icons.cancel_outlined),
+                                  ),
+                                  filterFn: (ingredient, filter) {
+                                    return ingredient.name.contains(filter);
+                                  },
+                                  asyncItems: (filterString) async {
+                                    List<Ingredient> ingredients =
+                                        await IngredientDao(await db
+                                                .databaseHelper.database)
+                                            .getAllIngredients();
+                                    return ingredients.where((ingredient) {
+                                      return ingredient.name
+                                              .contains(filterString) &&
+                                          !_selectedIngredientsAndAmount.any(
+                                              (element) =>
+                                                  element.item1.id ==
+                                                  ingredient.id);
+                                    }).toList();
+                                  },
+                                  compareFn: (ingredient1, ingredient2) {
+                                    return ingredient1.id! == ingredient2.id!;
+                                  },
+                                  itemAsString: (ingredient) {
+                                    return ingredient.name;
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Consumer<FocusModel>(
+                          builder:
+                              (BuildContext context, FocusModel focusModel, _) {
+                            return IngredientAmountList(
+                              selectedIngredientsAndAmount:
+                                  _selectedIngredientsAndAmount,
+                              deleteEntry: (index) {
+                                focusModel.remove(index);
+                                setState(() {
+                                  _selectedIngredientsAndAmount.removeAt(index);
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).viewInsets.bottom > 60
+                              ? MediaQuery.of(context).viewInsets.bottom
+                              : 60,
+                        )
+                      ],
                     ),
-                    IngredientAmountList(
-                      selectedIngredientsAndAmount:
-                          _selectedIngredientsAndAmount,
-                      deleteEntry: (index) {
-                        setState(() {
-                          _selectedIngredientsAndAmount.removeAt(index);
-                        });
-                      },
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: ButtonBar(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                          child: const Text("Close"),
+                        ),
+                        _isSubmitting
+                            ? const CircularProgressIndicator()
+                            : ElevatedButton(
+                                onPressed: () async {
+                                  Meal? meal = await _onSubmit();
+                                  if (meal == null) {
+                                    MealPlannerToast.showLongToast(
+                                        "Please check the form and make sure everything is filled out correctly");
+                                  } else {
+                                    if (context.mounted) {
+                                      Navigator.of(context)
+                                          .pop(meal); // Close the dialog
+                                    }
+                                  }
+                                },
+                                child: Text(
+                                    widget.givenMeal != null ? "Save" : "Add"),
+                              ),
+                      ],
                     ),
-                    SizedBox(
-                      height: MediaQuery.of(context).viewInsets.bottom > 60
-                          ? MediaQuery.of(context).viewInsets.bottom
-                          : 60,
-                    )
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: ButtonBar(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                      child: const Text("Close"),
-                    ),
-                    _isSubmitting
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () async {
-                              Meal? meal = await _onSubmit();
-                              if (meal == null) {
-                                MealPlannerToast.showLongToast(
-                                    "Please check the form and make sure everything is filled out correctly");
-                              } else {
-                                if (context.mounted) {
-                                  Navigator.of(context)
-                                      .pop(meal); // Close the dialog
-                                }
-                              }
-                            },
-                            child:
-                                Text(widget.givenMeal != null ? "Save" : "Add"),
-                          ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -328,16 +436,23 @@ class IngredientAmountList extends StatelessWidget {
                               8,
                               0,
                             ),
-                            child: AmountInputField(
-                              initialValue:
-                                  _selectedIngredientsAndAmount[index].item2,
-                              suffix: Ingredient.suffixOf(
-                                  _selectedIngredientsAndAmount[index]
-                                      .item1
-                                      .unit),
-                              onSaved: (String? amount) {
-                                _selectedIngredientsAndAmount[index].item2 =
-                                    double.parse(amount!);
+                            child: Consumer<FocusModel>(
+                              builder: (BuildContext context,
+                                  FocusModel focusModel, Widget? child) {
+                                return AmountInputField(
+                                  focusNode: focusModel.get(index),
+                                  initialValue:
+                                      _selectedIngredientsAndAmount[index]
+                                          .item2,
+                                  suffix: Ingredient.suffixOf(
+                                      _selectedIngredientsAndAmount[index]
+                                          .item1
+                                          .unit),
+                                  onSaved: (String? amount) {
+                                    _selectedIngredientsAndAmount[index].item2 =
+                                        double.parse(amount!);
+                                  },
+                                );
                               },
                             ),
                           ),
@@ -361,6 +476,7 @@ class AmountInputField extends StatefulWidget {
     this.onSaved,
     this.initialValue,
     this.leading,
+    this.focusNode,
   });
 
   final Widget? leading;
@@ -368,6 +484,7 @@ class AmountInputField extends StatefulWidget {
   final String? suffix;
   final void Function(String?)? onSaved;
   final num? initialValue;
+  final FocusNode? focusNode;
 
   @override
   State<AmountInputField> createState() => _AmountInputFieldState();
@@ -393,6 +510,7 @@ class _AmountInputFieldState extends State<AmountInputField> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextFormField(
+                    focusNode: widget.focusNode,
                     key: _globalKey,
                     //scrollPadding: EdgeInsets.only(
                     //    bottom: MediaQuery.of(context).viewInsets.bottom + 12),

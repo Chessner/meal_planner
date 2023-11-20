@@ -9,6 +9,7 @@ class FormTextInputCard extends StatelessWidget {
     this.controller,
     this.initValue,
     this.leading,
+    this.focusNode,
   });
 
   final void Function(String?)? onSaved;
@@ -17,6 +18,7 @@ class FormTextInputCard extends StatelessWidget {
   final TextEditingController? controller;
   final String? initValue;
   final Widget? leading;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class FormTextInputCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: TextFormField(
+                    focusNode: focusNode,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: onSaved,
                     controller: controller,
