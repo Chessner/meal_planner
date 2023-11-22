@@ -28,7 +28,7 @@ class MealPlannerDatabaseHelper {
       onConfigure: (db) async {
         await db.execute("PRAGMA foreign_keys = ON");
       },
-      version: 6,
+      version: 7,
     );
     return _database;
   }
@@ -59,6 +59,10 @@ Future<void> _updateDatabase(
   }
   if (fromVersion < 6 && curVersion < toVersion) {
     await _v6(db);
+    curVersion++;
+  }
+  if (fromVersion < 7 && curVersion < toVersion) {
+    await _v7(db);
     curVersion++;
   }
 }
@@ -129,4 +133,24 @@ Future<void> _v6(Database db) async {
   await db.execute("""
     ALTER TABLE meal ADD COLUMN instructions TEXT DEFAULT "";
   """);
+}
+
+Future<void> _v7(Database db) async {
+  await db.execute("""
+    CREATE TABLE new_calendar_event(
+      id INTEGER PRIMARY KEY, 
+      title TEXT,
+      description TEXT, 
+      start_date TEXT, 
+      end_date Text, 
+      meal_id INTEGER, 
+      FOREIGN KEY (meal_id) REFERENCES meal(id) ON DELETE CASCADE
+    )""");
+  await db.execute("""
+    INSERT INTO new_calendar_event 
+      (id, title, description, start_date, end_date, meal_id) 
+      SELECT id, title, description, start_date, end_date, meal_id FROM calendar_event
+  """);
+  await db.execute("DROP TABLE calendar_event");
+  await db.execute("ALTER TABLE new_calendar_event RENAME TO calendar_event");
 }
