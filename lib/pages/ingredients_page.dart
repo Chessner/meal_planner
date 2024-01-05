@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/meal_planner_database_provider.dart';
+import '../forms/dialogs/dismiss_approve_dialog.dart';
 
 class IngredientsPage extends StatefulWidget {
   @override
@@ -70,6 +71,16 @@ class _IngredientsPageState extends State<IngredientsPage> {
                               IngredientDao(
                                       await mDbProvider.databaseHelper.database)
                                   .deleteIngredient(_ingredients[index]);
+                            },
+                            confirmDismiss: (_) async {
+                              return await showDialog<bool>(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return DismissApproveDialog(
+                                    name: _ingredients[index].name,
+                                  );
+                                },
+                              );
                             },
                             background: Container(
                               color: Colors.red,

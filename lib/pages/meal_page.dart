@@ -6,6 +6,7 @@ import 'package:meal_planner/data/ingredient.dart';
 import 'package:meal_planner/data/meal_ingredient.dart';
 import 'package:meal_planner/data/tuple.dart';
 import 'package:meal_planner/database/meal_planner_database_helper.dart';
+import 'package:meal_planner/forms/dialogs/dismiss_approve_dialog.dart';
 import 'package:meal_planner/widgets/meal_planner_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -122,6 +123,16 @@ class _MealPageState extends State<MealPage> {
                               direction: DismissDirection.startToEnd,
                               onDismissed: (direction) {
                                 _removeMeal(_meals[index]);
+                              },
+                              confirmDismiss: (_) async {
+                                return await showDialog<bool>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return DismissApproveDialog(
+                                      name: _meals[index].name,
+                                    );
+                                  },
+                                );
                               },
                               background: Container(
                                 color: Colors.red,
